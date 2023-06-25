@@ -18,7 +18,7 @@ const AUDIO_NIPPLES = [
 ];
 
 export default function Player({ url }: { url: string }) {
-  const playerRef = React.useRef();
+  const playerRef = React.useRef<any>();
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [info, setInfo] = React.useState(AUDIO_NIPPLES[0]);
 
@@ -27,7 +27,7 @@ export default function Player({ url }: { url: string }) {
       <div className="w-1 h-1 overflow-hidden">
         <ReactPlayer
           playing={isPlaying}
-          ref={playerRef}
+          ref={playerRef as any}
           onProgress={({ playedSeconds }) => {
             if (playedSeconds > info.end) {
               setIsPlaying(false);
@@ -43,9 +43,11 @@ export default function Player({ url }: { url: string }) {
             key={nipple.start}
             className="p-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold  rounded-full shadow"
             onClick={() => {
-              playerRef.current.seekTo(nipple.start, "seconds");
-              setInfo(nipple);
-              setIsPlaying(true);
+              if (playerRef.current) {
+                playerRef.current.seekTo(nipple.start, "seconds");
+                setInfo(nipple);
+                setIsPlaying(true);
+              }
             }}
           >
             {nipple.label}

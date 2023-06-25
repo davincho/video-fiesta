@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-import lzString from "lz-string";
+import { encode, decode } from "@/lib/url";
+
 import { useEffect } from "react";
 import {
   UseFormReturn,
@@ -14,18 +15,6 @@ import {
   useFormState,
   useWatch,
 } from "react-hook-form";
-
-function encode(input: object) {
-  return lzString.compressToEncodedURIComponent(JSON.stringify(input));
-}
-
-function decode(input: string) {
-  if (!input) {
-    return {};
-  }
-
-  return JSON.parse(lzString.decompressFromEncodedURIComponent(input));
-}
 
 const Persister = ({ watch }: { watch: UseFormReturn["watch"] }) => {
   watch((data) => {

@@ -20,6 +20,7 @@ const AUDIO_NIPPLES = [
 export default function Player({ url }: { url: string }) {
   const playerRef = React.useRef<any>();
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isBuffering, setIsBuffering] = React.useState(false);
   const [info, setInfo] = React.useState(AUDIO_NIPPLES[0]);
 
   return (
@@ -28,6 +29,13 @@ export default function Player({ url }: { url: string }) {
         <ReactPlayer
           playing={isPlaying}
           ref={playerRef as any}
+          onReady={() => console.log("READY")}
+          onBuffer={() => {
+            setIsBuffering(true);
+          }}
+          onBufferEnd={() => {
+            setIsBuffering(false);
+          }}
           onProgress={({ playedSeconds }) => {
             if (playedSeconds > info.end) {
               setIsPlaying(false);
@@ -37,6 +45,14 @@ export default function Player({ url }: { url: string }) {
           url="https://www.youtube.com/watch?v=P59kknO1wQY"
         />
       </div>
+      {isBuffering && (
+        <div className="w-full bg-gray-300 overflow-hidden fixed top-0 left-0">
+          <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 animate-pulse text-center">
+            Buffering
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-5">
         {AUDIO_NIPPLES.map((nipple) => (
           <button

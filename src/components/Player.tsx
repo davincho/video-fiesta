@@ -11,8 +11,7 @@ const encoded =
 export default function Player({
   board = decode(encoded),
 }: {
-  url: string;
-  board: {
+  board?: {
     title: string;
     videos: [
       {

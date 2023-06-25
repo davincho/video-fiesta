@@ -29,7 +29,6 @@ export default function Player({ url }: { url: string }) {
           playing={isPlaying}
           ref={playerRef}
           onProgress={({ playedSeconds }) => {
-            console.log("playedSeconds", playedSeconds);
             if (playedSeconds > info.end) {
               setIsPlaying(false);
             }

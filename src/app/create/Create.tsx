@@ -135,39 +135,42 @@ function VideoScrubber({
         url={`https://www.youtube.com/watch?v=${field.value}`}
         controls
         width="100%"
-        height="100%"
+        height={200}
       />
       <div>
         Elapsed <span>{Math.round(progress?.playedSeconds ?? 0)}</span>
         Total <span>{duration}</span>
       </div>
       <div className="relative">
-        <div
-          className="bg-teal-600 h-3 absolute"
-          style={{
-            width: getWidthInPercentage(progress?.playedSeconds),
-          }}
-        />
-        <div
-          className="bg-teal-100 h-3"
-          style={{
-            width: getWidthInPercentage(duration),
-          }}
-        />
+        <div className="bg-yellow-100">
+          <div
+            className="bg-teal-600 h-3 absolute"
+            style={{
+              width: getWidthInPercentage(progress?.playedSeconds),
+            }}
+          />
+          <div
+            className="bg-teal-100 h-3"
+            style={{
+              width: getWidthInPercentage(duration),
+              height: 10,
+            }}
+          />
 
-        {nipples.map((nipple, index) => (
-          <div key={nipple.label + nipple.start}>
-            <label
-              title={nipple.label}
-              htmlFor={`${nipplesFieldName}.${index}.label`}
-              className="bg-yellow-200 h-3 relative cursor-pointer hover:bg-yellow-300 block"
-              style={{
-                left: nipple.start + "px",
-                width: getWidthInPercentage(nipple.end - nipple.start),
-              }}
-            />
-          </div>
-        ))}
+          {nipples.map((nipple, index) => (
+            <div key={nipple.label + nipple.start}>
+              <label
+                title={nipple.label}
+                htmlFor={`${nipplesFieldName}.${index}.label`}
+                className="bg-yellow-300 h-3 relative cursor-pointer hover:bg-yellow-400 block"
+                style={{
+                  left: nipple.start + "px",
+                  width: getWidthInPercentage(nipple.end - nipple.start),
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
@@ -205,28 +208,17 @@ function Videos() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Video #{index + 1}</CardTitle>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    append({
-                      videoId: "",
-                      nipples: [],
-                    });
-                  }}
-                >
-                  +
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
               <>
-                <div className="grid gap-2 grid-cols-[1fr_400px]">
+                <div className="grid gap-2 grid-cols-[1fr_400px] py-3">
                   <FormField
                     label="YouTube VideoId"
                     name={`videos.${index}.videoId`}
                   />
 
-                  <div className="h-[200px]">
+                  <div>
                     <VideoScrubber
                       nipplesFieldName={`videos.${index}.nipples`}
                       name={`videos.${index}.videoId`}
@@ -237,18 +229,43 @@ function Videos() {
                 <Nipples index={index} />
               </>
             </CardContent>
-
-            <CardFooter></CardFooter>
           </Card>
         );
       })}
+      <Button
+        type="button"
+        block
+        onClick={() => {
+          append({
+            videoId: "",
+            nipples: [],
+          });
+        }}
+      >
+        Add video
+      </Button>
     </>
   );
 }
 
 export default function Create() {
   const methods = useForm<FormValues>({
-    defaultValues: async () => decode(window.location.hash.substring(1)),
+    defaultValues: async () => {
+      const hash = window.location.hash.substring(1);
+
+      if (hash) {
+        return decode(hash);
+      }
+
+      return {
+        title: "",
+        videos: [
+          {
+            nipples: [{}],
+          },
+        ],
+      };
+    },
   });
 
   const router = useRouter();
@@ -282,9 +299,7 @@ export default function Create() {
             <CardContent>
               <Videos />
             </CardContent>
-            <CardFooter>
-              <p>Card Footer</p>
-            </CardFooter>
+            <CardFooter></CardFooter>
           </Card>
         </form>
       </FormProvider>

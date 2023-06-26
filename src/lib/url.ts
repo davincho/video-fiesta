@@ -9,5 +9,13 @@ export function decode(input: string) {
     return {};
   }
 
-  return JSON.parse(lzString.decompressFromEncodedURIComponent(input));
+  try {
+    const decoded = lzString.decompressFromEncodedURIComponent(input);
+
+    if (decoded) {
+      return JSON.parse(lzString.decompressFromEncodedURIComponent(input));
+    }
+  } catch (e) {}
+
+  return {};
 }

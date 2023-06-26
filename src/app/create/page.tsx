@@ -4,108 +4,225 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { encode, decode } from "@/lib/url";
 
-import { useEffect } from "react";
 import {
   UseFormReturn,
   useFieldArray,
   useForm,
+  useController,
+  FormProvider,
   useFormContext,
-  useFormState,
-  useWatch,
 } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import ReactPlayer from "react-player";
+import { ComponentProps, useState } from "react";
+import { OnProgressProps } from "react-player/base";
 
 const Persister = ({ watch }: { watch: UseFormReturn["watch"] }) => {
   watch((data) => {
-    window.location.hash = encode(data);
+    if (Object.keys(data).length === 0) {
+      return;
+    }
+
+    window.location.replace(`#${encode(data)}`);
   });
 
   return null;
 };
 
 function Nipples({
-  control,
   register,
   index,
-}: Pick<UseFormReturn, "control" | "register"> & { index: number }) {
+}: Pick<UseFormReturn, "register"> & { index: number }) {
   const { fields, append } = useFieldArray({
-    control,
     name: `videos.${index}.nipples`,
   });
 
   return (
     <>
-      <Button
-        type="button"
-        onClick={() => {
-          append({});
-        }}
-      >
-        Add nipple
-      </Button>
+      <div className="flex justify-between">
+        Nipples
+        <Button
+          type="button"
+          onClick={() => {
+            append({});
+          }}
+        >
+          Add nipple
+        </Button>
+      </div>
+
       {fields.map((field, nestedIndex) => (
         <>
-          <Label>
-            Sequence label
-            <Input
-              {...register(`videos.${index}.nipples.${nestedIndex}.label`)}
-            />
-          </Label>
+          <FormField
+            name={`videos.${index}.nipples.${nestedIndex}.label`}
+            label="Sequence label"
+          />
 
-          <Label>
-            Start (sec)
-            <Input
-              {...register(`videos.${index}.nipples.${nestedIndex}.start`)}
+          <div className="flex">
+            <FormField
+              name={`videos.${index}.nipples.${nestedIndex}.start`}
+              label="Start (sec)"
               type="number"
+              className="w-16"
             />
-          </Label>
 
-          <Label>
-            End (sec)
-            <Input
-              {...register(`videos.${index}.nipples.${nestedIndex}.end`)}
+            <FormField
+              name={`videos.${index}.nipples.${nestedIndex}.end`}
+              label="End (sec)"
               type="number"
+              className="w-16"
             />
-          </Label>
+          </div>
         </>
       ))}
     </>
   );
 }
 
-function Videos({
-  control,
-  register,
-}: Pick<UseFormReturn, "control" | "register">) {
+function VideoScrubber({
+  name,
+  nipplesFieldName,
+}: {
+  name: string;
+  nipplesFieldName: string;
+}) {
+  const [progress, setProgress] = useState<OnProgressProps>();
+  const [duration, setDuration] = useState<number>();
+
+  const { field } = useController({
+    name,
+  });
+
+  const {
+    field: { value: nipples },
+  } = useController({
+    name: nipplesFieldName,
+  });
+
+  const getWidthInPercentage = (seconds: string) => {
+    return duration ? `${(100 / duration) * Number.parseInt(seconds)}%` : "0%";
+  };
+
+  return (
+    <>
+      <ReactPlayer
+        onProgress={setProgress}
+        onDuration={setDuration}
+        url={`https://www.youtube.com/watch?v=${field.value}`}
+        controls
+        width="100%"
+        height="100%"
+      />
+      <div>
+        Elapsed <span>{Math.round(progress?.playedSeconds)}</span>
+        Total <span>{duration}</span>
+      </div>
+      <div className="relative">
+        <div
+          className="bg-teal-600 h-3 absolute"
+          style={{
+            width: getWidthInPercentage(progress?.playedSeconds),
+          }}
+        />
+        <div
+          className="bg-teal-100 h-3"
+          style={{
+            width: getWidthInPercentage(duration),
+          }}
+        />
+
+        {nipples.map((nipple, index) => (
+          <div key={nipple.label + nipple.start}>
+            <label
+              title={nipple.label}
+              htmlFor={`${nipplesFieldName}.${index}.label`}
+              className="bg-yellow-200 h-3 relative cursor-pointer hover:bg-yellow-300 block"
+              style={{
+                left: nipple.start + "px",
+                width: getWidthInPercentage(nipple.end - nipple.start),
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function FormField({
+  label,
+  name,
+  ...props
+}: { label: string; name: string } & ComponentProps<typeof Input>) {
+  const { register } = useFormContext();
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <Input id={name} {...props} {...register(name)} />
+    </div>
+  );
+}
+
+function Videos({ register }: Pick<UseFormReturn, "register">) {
   const { fields, append } = useFieldArray({
-    control,
     name: "videos",
   });
 
   return (
     <>
-      <Button
-        type="button"
-        onClick={() => {
-          append({
-            videoId: "",
-            nipples: [],
-          });
-        }}
-      >
-        Add Video
-      </Button>
       {fields.map((field, index) => {
         return (
-          <>
-            <Label>
-              YouTube VideoId
-              <Input {...register(`videos.${index}.videoId`)} />
-            </Label>
+          <Card key={index}>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Video #{index + 1}</CardTitle>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    append({
+                      videoId: "",
+                      nipples: [],
+                    });
+                  }}
+                >
+                  +
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <>
+                <div className="grid gap-2 grid-cols-[1fr_400px]">
+                  <FormField
+                    label="YouTube VideoId"
+                    name={`videos.${index}.videoId`}
+                  />
 
-            <Nipples index={index} register={register} control={control} />
-          </>
+                  <div className="h-[200px]">
+                    <VideoScrubber
+                      nipplesFieldName={`videos.${index}.nipples`}
+                      name={`videos.${index}.videoId`}
+                    />
+                  </div>
+                </div>
+
+                <Nipples index={index} register={register} />
+              </>
+            </CardContent>
+
+            <CardFooter></CardFooter>
+          </Card>
         );
       })}
     </>
@@ -113,18 +230,48 @@ function Videos({
 }
 
 export default function Create() {
-  const { register, watch, control } = useForm({
-    defaultValues: decode(window.location.hash.substring(1)),
+  const methods = useForm({
+    defaultValues: async () => decode(window.location.hash.substring(1)),
   });
 
+  const { register, watch } = methods;
+
+  const router = useRouter();
+
   return (
-    <form className="m-auto">
-      <Persister watch={watch} />
-      <Label>
-        Nipple Board Title
-        <Input {...register("title")} />
-      </Label>
-      <Videos control={control} register={register} />
-    </form>
+    <div className="container p-2">
+      <FormProvider {...methods}>
+        <form>
+          <Persister watch={watch} />
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Create your own Audio Nipple Board</CardTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    router.push(`/${window.location.hash}`);
+                  }}
+                >
+                  Share 🪄
+                </Button>
+              </div>
+              <CardDescription>
+                Add multiple Youtube videos and the sequences you want to
+                extract
+              </CardDescription>
+
+              <FormField label="Board title" name="title" />
+            </CardHeader>
+            <CardContent>
+              <Videos register={register} />
+            </CardContent>
+            <CardFooter>
+              <p>Card Footer</p>
+            </CardFooter>
+          </Card>
+        </form>
+      </FormProvider>
+    </div>
   );
 }

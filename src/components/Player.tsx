@@ -20,7 +20,8 @@ function Video({
   const playerRef = React.useRef<any>();
   const [isPlaying, setIsPlaying] = React.useState(false);
 
-  const [currentNipple, setCurrentNipple] = React.useState();
+  const [currentNipple, setCurrentNipple] =
+    React.useState<Video["nipples"][0]>();
 
   return (
     <>
@@ -66,10 +67,18 @@ function Video({
 }
 
 export default function Player() {
+  const [isMounted, setIsMounted] = React.useState(false);
   const [isBuffering, setIsBuffering] = React.useState(false);
 
-  const hashBoard = decode(document.location.hash.substring(1));
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
+  if (!isMounted) {
+    return null;
+  }
+
+  const hashBoard = decode(document.location.hash.substring(1));
   const board: Board =
     Object.keys(hashBoard).length > 0 ? hashBoard : decode(DEFAULT_BOARD);
 

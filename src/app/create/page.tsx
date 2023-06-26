@@ -14,21 +14,27 @@ import {
 } from "@/components/ui/card";
 
 import { encode, decode } from "@/lib/url";
+import { Board, Nipple } from "@/lib/types";
 
 import {
-  UseFormReturn,
   useFieldArray,
   useForm,
   useController,
   FormProvider,
   useFormContext,
+  FieldPath,
+  FieldPathByValue,
 } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { ComponentProps, useState } from "react";
 import { OnProgressProps } from "react-player/base";
 
-const Persister = ({ watch }: { watch: UseFormReturn["watch"] }) => {
+type FormValues = Board;
+
+const Persister = () => {
+  const { watch } = useFormContext<FormValues>();
+
   watch((data) => {
     if (Object.keys(data).length === 0) {
       return;
@@ -40,10 +46,7 @@ const Persister = ({ watch }: { watch: UseFormReturn["watch"] }) => {
   return null;
 };
 
-function Nipples({
-  register,
-  index,
-}: Pick<UseFormReturn, "register"> & { index: number }) {
+function Nipples({ index }: { index: number }) {
   const { fields, append } = useFieldArray({
     name: `videos.${index}.nipples`,
   });
@@ -94,13 +97,15 @@ function VideoScrubber({
   name,
   nipplesFieldName,
 }: {
-  name: string;
-  nipplesFieldName: string;
+  name: FieldPath<FormValues>;
+  nipplesFieldName: FieldPathByValue<FormValues, Nipple[]>;
 }) {
   const [progress, setProgress] = useState<OnProgressProps>();
   const [duration, setDuration] = useState<number>();
 
-  const { field } = useController({
+  const { control } = useFormContext<FormValues>();
+
+  const { field } = useController<FormValues>({
     name,
   });
 
@@ -108,10 +113,18 @@ function VideoScrubber({
     field: { value: nipples },
   } = useController({
     name: nipplesFieldName,
+    control,
   });
 
-  const getWidthInPercentage = (seconds: string) => {
-    return duration ? `${(100 / duration) * Number.parseInt(seconds)}%` : "0%";
+  const getWidthInPercentage = (seconds?: string | number) => {
+    if (!duration || !seconds) {
+      return "0%";
+    }
+
+    const convertedSeconds =
+      typeof seconds === "string" ? Number.parseInt(seconds) : seconds;
+
+    return `${(100 / duration) * convertedSeconds}%`;
   };
 
   return (
@@ -125,7 +138,7 @@ function VideoScrubber({
         height="100%"
       />
       <div>
-        Elapsed <span>{Math.round(progress?.playedSeconds)}</span>
+        Elapsed <span>{Math.round(progress?.playedSeconds ?? 0)}</span>
         Total <span>{duration}</span>
       </div>
       <div className="relative">
@@ -164,8 +177,10 @@ function FormField({
   label,
   name,
   ...props
-}: { label: string; name: string } & ComponentProps<typeof Input>) {
-  const { register } = useFormContext();
+}: { label: string; name: FieldPath<FormValues> } & ComponentProps<
+  typeof Input
+>) {
+  const { register } = useFormContext<FormValues>();
 
   return (
     <div>
@@ -175,7 +190,9 @@ function FormField({
   );
 }
 
-function Videos({ register }: Pick<UseFormReturn, "register">) {
+function Videos() {
+  const { register } = useFormContext<FormValues>();
+
   const { fields, append } = useFieldArray({
     name: "videos",
   });
@@ -217,7 +234,7 @@ function Videos({ register }: Pick<UseFormReturn, "register">) {
                   </div>
                 </div>
 
-                <Nipples index={index} register={register} />
+                <Nipples index={index} />
               </>
             </CardContent>
 
@@ -230,7 +247,7 @@ function Videos({ register }: Pick<UseFormReturn, "register">) {
 }
 
 export default function Create() {
-  const methods = useForm({
+  const methods = useForm<FormValues>({
     defaultValues: async () => decode(window.location.hash.substring(1)),
   });
 
@@ -242,12 +259,13 @@ export default function Create() {
     <div className="container p-2">
       <FormProvider {...methods}>
         <form>
-          <Persister watch={watch} />
+          <Persister />
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Create your own Audio Nipple Board</CardTitle>
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => {
                     router.push(`/${window.location.hash}`);
@@ -264,7 +282,7 @@ export default function Create() {
               <FormField label="Board title" name="title" />
             </CardHeader>
             <CardContent>
-              <Videos register={register} />
+              <Videos />
             </CardContent>
             <CardFooter>
               <p>Card Footer</p>

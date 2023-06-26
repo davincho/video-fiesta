@@ -4,20 +4,11 @@ import React from "react";
 import ReactPlayer from "react-player";
 
 import { decode, encode } from "@/lib/url";
+import { Board, Video } from "@/lib/types";
 import Link from "next/link";
 
 const DEFAULT_BOARD =
-  "N4IgLglmA2CmIC4QDkIAc1wAQCED2AhgE4AmIANCAG4Qmx4DOiA2qDXXgJJlIAKArAE4A1sIB2AeQCMAdwCKATQogx6TLCYJWIaAQBGsaIhAAJAIIAtAKrIA4soZhiYY1IBMy2GJ4gpANhAAX3JQXQMjJABZAB2AFQBRByciFyQADk9vVw9g0P1DYxN4gCVirEjOZE4AZQTipOdjPwB2TJ8-DMCAXW7AoA";
-
-type Video = {
-  videoId: string;
-  nipples: [{ label: string; start: number; end: number }];
-};
-
-type Board = {
-  title: string;
-  videos: Video[];
-};
+  "N4IgLglmA2CmIC4QHUKwHawE4AIByEADoXDgEID2AhlgCYgA0IAbhLbBQM6IDaor7CgEl6SAAoBWAJwBrGegDyARgDuARQCajEOiIlY3BHxDQqAI1jREIABIBBAFoBVPAHFtnMDTDWlAJm0MURAlADYQAF8GUFMLKyQAWQAdgBUAUQ8vLB8kAA5A9GD-SOiTc0trGzSAJWqcBKE8IQBldOrM72tQgHYC4O6AFkiAXSj+Ng4RazVcgAt0MWQzAGkAMTEAY21dYjhDY1iKpDIsCHQAcy8cM1OLrw7s6wklPqeJEpjy+NsqMBw7C6eHC0NA4JyebBYWAQDazbAPHIhAAMvSYQV8fiRIwioyAA";
 
 function Video({
   video,

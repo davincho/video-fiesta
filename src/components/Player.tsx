@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { Fragment } from "react";
 import ReactPlayer from "react-player";
 
 import { decode, encode } from "@/lib/url";
-import { Board, Video } from "@/lib/types";
+import { Board, Nipple, Video } from "@/lib/types";
 import Link from "next/link";
 
 const DEFAULT_BOARD =
-  "N4IgLglmA2CmIC4QHUKwHawE4AIByEADoXDgEID2AhlgCYgA0IAbhLbBQM6IDaor7CgEl6SAAoBWAJwBrGegDyARgDuARQCajEOiIlY3BHxDQqAI1jREIABIBBAFoBVPAHFtnMDTDWlAJm0MURAlADYQAF8GUFMLKyQAWQAdgBUAUQ8vLB8kAA5A9GD-SOiTc0trGzSAJWqcBKE8IQBldOrM72tQgHYC4O6AFkiAXSj+Ng4RazVcgAt0MWQzAGkAMTEAY21dYjhDY1iKpDIsCHQAcy8cM1OLrw7s6wklPqeJEpjy+NsqMBw7C6eHC0NA4JyebBYWAQDazbAPHIhAAMvSYQV8fiRIwioyAA";
+  "N4IgLglmA2CmIC4QHUKwHawE4AIByEADoXDgEID2AhlgCYgA0IAbhLbBQM6IDaor7CgEl6SAAoBWAJwBrGegDyARgDuARQCajEOiIlY3BHxDQqAI1jREIABIBBAFoBVPAHFtnMDTDWlAJm0MURAlADYQAF8GUFMLKyQAWQAdgBUAUQ8vLB8kAA5A9GD-SOiTc0trGzSAJWqcBKE8IQBldOrM72tQgHYC4O6AFkiAXSj+Ng4RazVcgAt0MWQzAGkAMTEAY21dYjhDY1iKpDIsCHQAcy8cM1OLrw7s6wklPqeJEpjy+NsqMBw7C6eHC0NA4JyebBYWAQDazbAPHIhAAMvSYQV8fiRIzGLAmwmCsGaAClzgBPADChAAGhoNHZtno9rxPnFrNUqDJYGAMFgqABXWHwpieTpICTvNGFJ5SD5lVlIZpgKEwuHQdAIrovSX9F4RUalASTYKcNRidAAL1cuXQAFoqecGbsDMy5UcQHgACewiHA2DEX6wHCrLAUB3CrKIgDMQ21Tyxepxhvx1lWYAA+mncrlzWpXFIhI79PsWW6AGqwc5cmhoLAapADCUgdH1mUJg14qb12jdG2ENOrCREzgJQtMowl77LX7mwOrCCcWGzKiFaB8i51kCRyP5WNIaO9BOjIA";
 
 function Video({
   video,
@@ -17,18 +17,22 @@ function Video({
   video: Video;
   toggleBuffering: (buffering: boolean) => void;
 }) {
-  const playerRef = React.useRef<any>();
+  const playerRef = React.useRef<ReactPlayer>();
   const [isPlaying, setIsPlaying] = React.useState(false);
 
-  const [currentNipple, setCurrentNipple] =
-    React.useState<Video["nipples"][0]>();
+  const [currentNipple, setCurrentNipple] = React.useState<Nipple>();
 
   return (
     <>
-      <div className="w-1 h-1 overflow-hidden">
+      <div className="overflow-hidden">
         <ReactPlayer
           playing={isPlaying}
           ref={playerRef as any}
+          config={{
+            youtube: {
+              embedOptions: {},
+            },
+          }}
           onBuffer={() => {
             toggleBuffering(true);
           }}
@@ -45,7 +49,7 @@ function Video({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
+      <div className="grid grid-cols-4 gap-5">
         {video.nipples.map((nipple) => (
           <button
             key={nipple.start}
@@ -70,6 +74,14 @@ export default function Player() {
   const [isMounted, setIsMounted] = React.useState(false);
   const [isBuffering, setIsBuffering] = React.useState(false);
 
+  const playerRef = React.useRef<ReactPlayer>();
+  const [isPlaying, setIsPlaying] = React.useState(false);
+
+  const [currentScene, setCurrentScene] = React.useState<{
+    nipple: Nipple;
+    video: Video;
+  }>();
+
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -82,6 +94,8 @@ export default function Player() {
   const board: Board =
     Object.keys(hashBoard).length > 0 ? hashBoard : decode(DEFAULT_BOARD);
 
+  console.log("currentScene", currentScene);
+
   return (
     <>
       {isBuffering && (
@@ -91,16 +105,61 @@ export default function Player() {
           </div>
         </div>
       )}
-      <h1 className="text-3xl text-center pb-10">{board.title}</h1>
+
       <Link href={`/create#${encode(board)}`}>Edit</Link>
 
-      {board.videos.map((video) => (
-        <Video
-          key={video.videoId}
-          video={video}
-          toggleBuffering={setIsBuffering}
-        />
-      ))}
+      <div className="grid grid-cols-3 gap-2">
+        <h1 className="col-span-3 text-3xl text-center">{board.title}</h1>
+
+        <div className="col-span-3 h-56">
+          <ReactPlayer
+            height="100%"
+            width="100%"
+            playing={isPlaying}
+            ref={playerRef as any}
+            config={{
+              youtube: {
+                embedOptions: {},
+              },
+            }}
+            onBuffer={() => {
+              setIsBuffering(true);
+            }}
+            onBufferEnd={() => {
+              setIsBuffering(false);
+            }}
+            onEnded={() => setIsPlaying(false)}
+            url={`https://www.youtube.com/watch?v=${currentScene?.video.videoId}&start=${currentScene?.nipple.start}&end=${currentScene?.nipple.end}`}
+          />
+        </div>
+
+        {board.videos.map((video) => (
+          <Fragment key={video.videoId}>
+            {video.nipples.map((nipple) => (
+              <Fragment key={nipple.start}>
+                <button
+                  className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold  rounded-full shadow"
+                  onClick={() => {
+                    if (playerRef.current) {
+                      console.log("SEEKING", nipple.start);
+                      playerRef.current.seekTo(nipple.start, "seconds");
+
+                      setCurrentScene({
+                        nipple,
+                        video,
+                      });
+
+                      setIsPlaying(true);
+                    }
+                  }}
+                >
+                  {nipple.label}
+                </button>
+              </Fragment>
+            ))}
+          </Fragment>
+        ))}
+      </div>
     </>
   );
 }

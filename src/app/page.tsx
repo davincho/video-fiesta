@@ -24,11 +24,11 @@ export default async function Home({ searchParams }: { searchParams: any }) {
     Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(DEFAULT_BOARD);
 
   return (
-    <main className="min-h-screen sm:px-24 md:px-40 p-4">
+    <main className="min-h-screen p-4 sm:px-24 md:px-40">
       <Card>
         <CardHeader>
           <div className="flex justify-between">
-            <CardTitle className="text-4xl col-span-2 font-extrabold tracking-tight">
+            <CardTitle className="col-span-2 text-4xl font-extrabold tracking-tight">
               {board.title}
             </CardTitle>
             <Button type="button" variant="outline" asChild>

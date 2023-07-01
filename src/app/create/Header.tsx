@@ -25,7 +25,7 @@ function FormField({
   const { register } = useFormContext<FormValues>();
 
   return (
-    <div className="flex gap-2 flex-col py-2">
+    <div className="flex flex-col gap-2 py-2">
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} {...props} {...register(name)} />
     </div>
@@ -44,7 +44,7 @@ export default function Header() {
 
   return (
     <CardHeader>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <CardTitle>
           {field.value && field.value !== ""
             ? field.value

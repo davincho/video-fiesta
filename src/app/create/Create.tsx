@@ -62,12 +62,12 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
 
   return (
     <div>
-      <h3 className="text-lg mb-2">Sequences</h3>
+      <h3 className="mb-2 text-lg">Sequences</h3>
 
       {fields.map((field, index) => (
         <div
           key={field.id}
-          className="grid grid-flow-col auto-cols-min gap-2 hover:bg-gray-100 -ml-3 p-2 px-3 rounded-lg"
+          className="-ml-3 grid auto-cols-min grid-flow-col gap-2 rounded-lg p-2 px-3 hover:bg-gray-100"
         >
           <FormField
             name={`videos.${parentIndex}.nipples.${index}.label`}
@@ -92,7 +92,7 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
             className="w-20"
           />
 
-          <div className="flex justify-self-end place-self-end self-end pb-2 w-full justify-between">
+          <div className="flex w-full justify-between place-self-end self-end justify-self-end pb-2">
             <Button variant="outline" type="button">
               ▶️
             </Button>
@@ -164,7 +164,7 @@ function VideoScrubber({
     <>
       <div className="relative">
         {hasError && (
-          <div className="absolute bg-red-400 h-[200px] z-20 w-full flex justify-center text-white items-center">
+          <div className="absolute z-20 flex h-[200px] w-full items-center justify-center bg-red-400 text-white">
             There is something wrong with your video 😢
           </div>
         )}
@@ -184,7 +184,7 @@ function VideoScrubber({
         {!hasError && (
           <div className="bg-yellow-100">
             <div
-              className="bg-red-400 absolute z-10"
+              className="absolute z-10 bg-red-400"
               style={{
                 left: getWidthInPercentage(progress?.playedSeconds),
                 width: (progress?.playedSeconds ?? 0) > 0 ? 1 : 0,
@@ -193,7 +193,7 @@ function VideoScrubber({
             />
 
             <div
-              className="bg-teal-600 absolute z-10"
+              className="absolute z-10 bg-teal-600"
               style={{
                 width: getWidthInPercentage(progress?.playedSeconds),
                 height: 10,
@@ -201,7 +201,7 @@ function VideoScrubber({
             />
 
             <div
-              className="bg-teal-100 h-3"
+              className="h-3 bg-teal-100"
               style={{
                 width: getWidthInPercentage(duration),
                 height: 10,
@@ -256,7 +256,7 @@ function Sequence({
         onClick={onClick}
         title={nipple.label}
         htmlFor={`${nippleFormName}.label`}
-        className="bg-yellow-300 h-3 relative cursor-pointer hover:bg-yellow-400 block"
+        className="relative block h-3 cursor-pointer bg-yellow-300 hover:bg-yellow-400"
         style={{
           left: getWidthInPercentage(nipple.start),
           width: getWidthInPercentage(nipple.end - nipple.start),
@@ -276,7 +276,7 @@ function FormField({
   const { register } = useFormContext<FormValues>();
 
   return (
-    <div className="flex gap-2 flex-col py-2">
+    <div className="flex flex-col gap-2 py-2">
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} {...props} {...register(name)} />
     </div>
@@ -306,7 +306,7 @@ function Videos() {
                   <Card>
                     <CardContent>
                       <>
-                        <div className="grid gap-2 grid-cols-[1fr_400px] py-3">
+                        <div className="grid grid-cols-[1fr_400px] gap-2 py-3">
                           <Nipples parentIndex={index} />
                           <div>
                             <FormField

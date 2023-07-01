@@ -22,6 +22,8 @@ export default function Player({ board }: { board: Board }) {
 
   React.useEffect(() => {
     setIsMounted(true);
+
+    console.log('document.querySelector("button")?.click();');
   }, []);
 
   if (!isMounted) {
@@ -31,17 +33,17 @@ export default function Player({ board }: { board: Board }) {
   return (
     <>
       {isBuffering && (
-        <div className="w-full bg-gray-300 overflow-hidden fixed top-0 left-0 text-white">
-          <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 animate-pulse text-center">
+        <div className="fixed left-0 top-0 w-full overflow-hidden bg-gray-300 text-white">
+          <div className="animate-pulse bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-center">
             Buffering
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="col-span-3 h-56 relative">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+        <div className="relative h-56 md:col-span-3">
           {!isPlaying && (
-            <div className="absolute w-full h-full flex items-center">
+            <div className="absolute flex h-full w-full items-center">
               Click one of the buttons
             </div>
           )}
@@ -71,7 +73,7 @@ export default function Player({ board }: { board: Board }) {
             {video.nipples.map((nipple) => (
               <Fragment key={nipple.start}>
                 <button
-                  className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold  rounded-full shadow"
+                  className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-4 font-bold text-white shadow  hover:from-pink-500 hover:to-purple-500"
                   onClick={() => {
                     if (playerRef.current) {
                       playerRef.current.seekTo(nipple.start, "seconds");

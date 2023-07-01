@@ -131,7 +131,7 @@ function VideoScrubber({
 
   const playerRef = useRef<any>();
 
-  const { field } = useController<FormValues>({
+  const { field } = useController({
     name,
   });
 
@@ -140,7 +140,7 @@ function VideoScrubber({
 
   const {
     field: { value: nipples },
-  } = useController({
+  } = useController<FormValues, typeof nipplesFieldName>({
     name: nipplesFieldName,
   });
 

@@ -37,7 +37,7 @@ export default function Header() {
 
   const { reset } = useFormContext();
 
-  const { field } = useController({
+  const { field } = useController<FormValues, "title">({
     name: "title",
   });
 

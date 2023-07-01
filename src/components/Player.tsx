@@ -5,7 +5,8 @@ import ReactPlayer from "react-player";
 
 import { decode, encode } from "@/lib/url";
 import { Board, Nipple, Video } from "@/lib/types";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const DEFAULT_BOARD =
   "N4IgLglmA2CmIC4QHUKwHawE4AIByEADoXDgEID2AhlgCYgA0IAbhLbBQM6IDaor7CgEl6SAAoBWAJwBrGegDyARgDuARQCajEOiIlY3BHxDQqAI1jREIABIBBAFoBVPAHFtnMDTDWlAJm0MURAlADYQAF8GUFMLKyQAWQAdgBUAUQ8vLB8kAA5A9GD-SOiTc0trGzSAJWqcBKE8IQBldOrM72tQgHYC4O6AFkiAXSj+Ng4RazVcgAt0MWQzAGkAMTEAY21dYjhDY1iKpDIsCHQAcy8cM1OLrw7s6wklPqeJEpjy+NsqMBw7C6eHC0NA4JyebBYWAQDazbAPHIhAAMvSYQV8fiRIzGLAmwmCsGaAClzgBPADChAAGhoNHZtno9rxPnFrNUqDJYGAMFgqABXWHwpieTpICTvNGFJ5SD5lVlIZpgKEwuHQdAIrovSX9F4RUalASTYKcNRidAAL1cuXQAFoqecGbsDMy5UcQHgACewiHA2DEX6wHCrLAUB3CrKIgDMQ21Tyxepxhvx1lWYAA+mncrlzWpXFIhI79PsWW6AGqwc5cmhoLAapADCUgdH1mUJg14qb12jdG2ENOrCREzgJQtMowl77LX7mwOrCCcWGzKiFaB8i51kCRyP5WNIaO9BOjIA";
@@ -82,6 +83,8 @@ export default function Player() {
     video: Video;
   }>();
 
+  const router = useRouter();
+
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -94,8 +97,6 @@ export default function Player() {
   const board: Board =
     Object.keys(hashBoard).length > 0 ? hashBoard : decode(DEFAULT_BOARD);
 
-  console.log("currentScene", currentScene);
-
   return (
     <>
       {isBuffering && (
@@ -106,10 +107,20 @@ export default function Player() {
         </div>
       )}
 
-      <Link href={`/create#${encode(board)}`}>Edit</Link>
-
       <div className="grid grid-cols-3 gap-2">
-        <h1 className="col-span-3 text-3xl text-center">{board.title}</h1>
+        <h1 className="text-4xl col-span-2 font-extrabold tracking-tight">
+          {board.title}
+        </h1>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            router.push(`/create#${encode(board)}`);
+          }}
+        >
+          ✏️ Edit
+        </Button>
 
         <div className="col-span-3 h-56">
           <ReactPlayer
@@ -141,7 +152,6 @@ export default function Player() {
                   className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold  rounded-full shadow"
                   onClick={() => {
                     if (playerRef.current) {
-                      console.log("SEEKING", nipple.start);
                       playerRef.current.seekTo(nipple.start, "seconds");
 
                       setCurrentScene({

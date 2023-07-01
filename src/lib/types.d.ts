@@ -11,5 +11,5 @@ export type Video = {
 
 export type Board = {
   title: string;
-  videos: Video[];
+  videos?: Video[];
 };

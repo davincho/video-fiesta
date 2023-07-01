@@ -33,18 +33,23 @@ import ReactPlayer from "react-player";
 import { ComponentProps, useRef, useState } from "react";
 import { OnProgressProps } from "react-player/base";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 type FormValues = Board;
 
 const Persister = () => {
   const { watch } = useFormContext<FormValues>();
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   watch((data) => {
     if (Object.keys(data).length === 0) {
       return;
     }
 
-    window.location.replace(`#${encode(data)}`);
+    router.push(`${pathname}?board=${encode(data)}`);
   });
 
   return null;
@@ -354,12 +359,14 @@ function Videos() {
 }
 
 export default function Create() {
+  const params = useSearchParams();
+
+  const encodedBoard = params.get("board");
+
   const methods = useForm<FormValues>({
     defaultValues: async () => {
-      const hash = window.location.hash.substring(1);
-
-      if (hash) {
-        return decode(hash);
+      if (encodedBoard) {
+        return decode(encodedBoard);
       }
 
       return {};

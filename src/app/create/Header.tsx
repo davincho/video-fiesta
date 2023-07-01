@@ -9,7 +9,7 @@ import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Board } from "@/lib/types";
 
 import { useController, useFormContext, FieldPath } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { ComponentProps } from "react";
 
@@ -36,6 +36,7 @@ export default function Header() {
   const router = useRouter();
 
   const { reset } = useFormContext();
+  const searchParams = useSearchParams();
 
   const { field } = useController<FormValues, "title">({
     name: "title",
@@ -60,14 +61,8 @@ export default function Header() {
           >
             ↪️ Reset
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              router.push(`/${window.location.hash}`);
-            }}
-          >
-            Share 🪄
+          <Button variant="outline" asChild>
+            <a href={`/?${searchParams.toString()}`}>Share 🪄</a>
           </Button>
         </div>
       </div>

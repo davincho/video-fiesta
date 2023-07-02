@@ -14,14 +14,23 @@ import {
 import { Board } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
-const DEFAULT_BOARD =
-  "N4IgLglmA2CmIC4QHUKwHawE4AIByEADoXDgEID2AhlgCYgA0IAbhLbBQM6IDaor7CgEl6SAAoBWAJwBrGegDyARgDuARQCajEOiIlY3BHxDQqAI1jREIABIBBAFoBVPAHFtnMDTDWlAJm0MURAlADYQAF8GUFMLKyQAWQAdgBUAUQ8vLB8kAA5A9GD-SOiTc0trGzSAJWqcBKE8IQBldOrM72tQgHYC4O6AFkiAXSj+Ng4RazVcgAt0MWQzAGkAMTEAY21dYjhDY1iKpDIsCHQAcy8cM1OLrw7s6wklPqeJEpjy+NsqMBw7C6eHC0NA4JyebBYWAQDazbAPHIhAAMvSYQV8fiRIzGLAmwmCsGaAClzgBPADChAAGhoNHZtno9rxPnFrNUqDJYGAMFgqABXWHwpieTpICTvNGFJ5SD5lVlIZpgKEwuHQdAIrovSX9F4RUalASTYKcNRidAAL1cuXQAFoqecGbsDMy5UcQHgACewiHA2DEX6wHCrLAUB3CrKIgDMQ21Tyxepxhvx1lWYAA+mncrlzWpXFIhI79PsWW6AGqwc5cmhoLAapADCUgdH1mUJg14qb12jdG2ENOrCREzgJQtMowl77LX7mwOrCCcWGzKiFaB8i51kCRyP5WNIaO9BOjIA";
+import { kv } from "@vercel/kv";
+
+async function getDefaulBoard() {
+  const { board } = await kv.hgetall<{ board: string }>("viech");
+
+  return {
+    board,
+  };
+}
 
 export default async function Home({ searchParams }: { searchParams: any }) {
+  const { board: defaultBoard } = await getDefaulBoard();
+
   const encodedBoard = decode(searchParams.board);
 
   const board: Board =
-    Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(DEFAULT_BOARD);
+    Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(defaultBoard);
 
   return (
     <main className="min-h-screen p-4 sm:px-24 lg:px-40">

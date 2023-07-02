@@ -16,18 +16,32 @@ import { Button } from "@/components/ui/button";
 
 import { kv } from "@vercel/kv";
 
-async function getDefaulBoard() {
-  const { board } = await kv.hgetall<{ board: string }>("viech");
+type KV_BOARD = {
+  id: string;
+  board: string;
+  edit_token: string;
+  created_at: Date;
+  updated_at: Date;
+  published_at: Date;
+};
+
+async function getDefaulBoard(userEdtiToken: string) {
+  const { board, editToken } = await kv.hgetall<{ board: string }>("viech");
 
   return {
     board,
+    canEdit: String(editToken) === userEdtiToken,
   };
 }
 
 export default async function Home({ searchParams }: { searchParams: any }) {
-  const { board: defaultBoard } = await getDefaulBoard();
+  const { board: defaultBoard, canEdit } = await getDefaulBoard(
+    searchParams.editToken
+  );
 
   const encodedBoard = decode(searchParams.board);
+
+  console.log("editToken", canEdit);
 
   const board: Board =
     Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(defaultBoard);
@@ -40,9 +54,11 @@ export default async function Home({ searchParams }: { searchParams: any }) {
             <CardTitle className="col-span-2 text-4xl font-extrabold tracking-tight">
               {board.title}
             </CardTitle>
-            <Button type="button" variant="outline" asChild>
-              <a href={`/create?board=${encode(board)}`}>✏️ Edit</a>
-            </Button>
+            {canEdit && (
+              <Button type="button" variant="outline" asChild>
+                <a href={`/create?board=${encode(board)}`}>Edit ✏️</a>
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>

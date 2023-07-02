@@ -164,11 +164,16 @@ function VideoScrubber({
   return (
     <>
       <div className="relative">
-        {hasError && (
+        {!field.value && hasError && (
           <div className="absolute z-20 flex h-[200px] w-full items-center justify-center bg-red-400 text-white">
             There is something wrong with your video 😢
           </div>
         )}
+
+        {!field.value && hasError && (
+          <div className="h-[200px] animate-pulse rounded-md bg-gray-300" />
+        )}
+
         <ReactPlayer
           playing={isPlaying}
           onProgress={setProgress}

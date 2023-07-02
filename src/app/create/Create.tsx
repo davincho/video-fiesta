@@ -17,6 +17,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { encode, decode } from "@/lib/url";
 import { Board, Nipple } from "@/lib/types";
+import Logo from "@/components/Logo";
 
 import {
   useFieldArray,
@@ -295,7 +296,7 @@ function Videos() {
           type="single"
           collapsible
           data-id={fields[0]?.id}
-          value={fields[0]?.id}
+          defaultValue={fields[0]?.id}
           className="mb-3"
         >
           {fields.map((field, index) => {
@@ -375,8 +376,8 @@ export default function Create() {
 
   return (
     <div className="container p-5">
-      <Link href="/" className="text-lg">
-        Video Fiesta 🎉
+      <Link href="/" className="block pb-2 font-mono text-lg">
+        <Logo />
       </Link>
       <FormProvider {...methods}>
         <form>

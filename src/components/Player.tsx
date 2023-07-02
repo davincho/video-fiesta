@@ -22,8 +22,6 @@ export default function Player({ board }: { board: Board }) {
 
   React.useEffect(() => {
     setIsMounted(true);
-
-    console.log('document.querySelector("button")?.click();');
   }, []);
 
   if (!isMounted) {
@@ -40,34 +38,7 @@ export default function Player({ board }: { board: Board }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-        <div className="relative h-56 md:col-span-3">
-          {!isPlaying && (
-            <div className="absolute flex h-full w-full items-center">
-              Click one of the buttons
-            </div>
-          )}
-          <ReactPlayer
-            height="100%"
-            width="100%"
-            playing={isPlaying}
-            ref={playerRef as any}
-            config={{
-              youtube: {
-                embedOptions: {},
-              },
-            }}
-            onBuffer={() => {
-              setIsBuffering(true);
-            }}
-            onBufferEnd={() => {
-              setIsBuffering(false);
-            }}
-            onEnded={() => setIsPlaying(false)}
-            url={`https://www.youtube.com/watch?v=${currentScene?.video.videoId}&start=${currentScene?.nipple.start}&end=${currentScene?.nipple.end}`}
-          />
-        </div>
-
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
         {(board?.videos ?? []).map((video) => (
           <Fragment key={video.videoId}>
             {video.nipples.map((nipple) => (
@@ -93,6 +64,32 @@ export default function Player({ board }: { board: Board }) {
             ))}
           </Fragment>
         ))}
+        <div className="relative row-start-1 h-56 md:col-span-2 lg:col-span-2 lg:col-start-2 lg:row-span-3 lg:row-start-2">
+          {!currentScene?.video && (
+            <div className="absolute flex h-full w-full items-center justify-center">
+              Click one of the buttons and 🤣🤣🤣
+            </div>
+          )}
+          <ReactPlayer
+            height="100%"
+            width="100%"
+            playing={isPlaying}
+            ref={playerRef as any}
+            config={{
+              youtube: {
+                embedOptions: {},
+              },
+            }}
+            onBuffer={() => {
+              setIsBuffering(true);
+            }}
+            onBufferEnd={() => {
+              setIsBuffering(false);
+            }}
+            onEnded={() => setIsPlaying(false)}
+            url={`https://www.youtube.com/watch?v=${currentScene?.video.videoId}&start=${currentScene?.nipple.start}&end=${currentScene?.nipple.end}`}
+          />
+        </div>
       </div>
     </>
   );

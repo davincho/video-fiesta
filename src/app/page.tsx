@@ -24,7 +24,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
     Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(DEFAULT_BOARD);
 
   return (
-    <main className="min-h-screen p-4 sm:px-24 md:px-40">
+    <main className="min-h-screen p-4 sm:px-24 lg:px-40">
       <Card>
         <CardHeader>
           <div className="flex justify-between">

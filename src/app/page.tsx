@@ -26,7 +26,10 @@ type KV_BOARD = {
 };
 
 async function getDefaulBoard(userEdtiToken: string) {
-  const { board, editToken } = await kv.hgetall<{ board: string }>("viech");
+  const { board, editToken } = await kv.hgetall<{
+    board: string;
+    editToken: string;
+  }>("viech");
 
   return {
     board,

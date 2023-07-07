@@ -1,5 +1,8 @@
 "use client";
 
+import confetti from "canvas-confetti";
+
+import { experimental_useFormStatus as useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,10 +33,24 @@ export default function Header() {
     name: "title",
   });
 
+  const { pending } = useFormStatus();
+
+  console.log("pending", pending);
+
   return (
     <>
-      <Dialog open>
-        <DialogTrigger>Open</DialogTrigger>
+      <Dialog>
+        <DialogTrigger
+          onClick={() => {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+            });
+          }}
+        >
+          Open
+        </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -55,7 +72,6 @@ export default function Header() {
         </DialogContent>
       </Dialog>
       <CardHeader>
-        <div className="sticky top-0 z-50">sdfdsf</div>
         <div className="flex items-center justify-between">
           <CardTitle>
             {field.value && field.value !== ""
@@ -75,11 +91,11 @@ export default function Header() {
                 ↪️ Reset
               </Button>
               <Button variant="outline" asChild>
-                <a href={`/?${searchParams.toString()}`}>Share 🪄</a>
+                <a href={`/preview?${searchParams.toString()}`}>Preview 🪄</a>
               </Button>
 
-              <Button variant="outline" asChild>
-                <a href={`/?${searchParams.toString()}`}>Publish 🦄</a>
+              <Button variant="outline" type="submit" disabled={pending}>
+                Publish 🦄
               </Button>
             </div>
           </div>

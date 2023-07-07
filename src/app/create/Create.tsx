@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 
+import { saveBoard } from "./actions";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -325,7 +327,7 @@ function Videos() {
                           remove(index);
                         }}
                       >
-                        Delete
+                        Delete video
                       </Button>
                     </CardFooter>
                   </Card>
@@ -369,18 +371,15 @@ export default function Create() {
     },
   });
 
-  const {
-    formState: { errors },
-  } = methods;
-
   return (
     <div className="container p-5">
       <Toaster />
+
       <Link href="/" className="block pb-2 font-mono text-lg">
         <Logo />
       </Link>
       <FormProvider {...methods}>
-        <form>
+        <form action={saveBoard}>
           <Persister />
           <Card>
             <Header />

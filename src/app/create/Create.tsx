@@ -1,8 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Toaster } from "@/components/ui/toaster";
 
 import Header from "./Header";
 
@@ -16,7 +18,8 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { encode, decode } from "@/lib/url";
-import { Board, Nipple } from "@/lib/types";
+import { Nipple } from "@/lib/types";
+import { schema, FormValues } from "@/lib/schema";
 import Logo from "@/components/Logo";
 
 import {
@@ -36,7 +39,7 @@ import { OnProgressProps } from "react-player/base";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
-type FormValues = Board;
+import FormField from "./FormField";
 
 const Persister = () => {
   const { watch } = useFormContext<FormValues>();
@@ -83,6 +86,9 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
             placeholder="sec"
             min={0}
             className="w-20"
+            registerProps={{
+              valueAsNumber: true,
+            }}
           />
 
           <FormField
@@ -91,6 +97,9 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
             placeholder="sec"
             type="number"
             className="w-20"
+            registerProps={{
+              valueAsNumber: true,
+            }}
           />
 
           <div className="flex w-full justify-between place-self-end self-end justify-self-end pb-2">
@@ -168,10 +177,6 @@ function VideoScrubber({
           <div className="absolute z-20 flex h-[200px] w-full items-center justify-center bg-red-400 text-white">
             There is something wrong with your video 😢
           </div>
-        )}
-
-        {!field.value && hasError && (
-          <div className="h-[200px] animate-pulse rounded-md bg-gray-300" />
         )}
 
         <ReactPlayer
@@ -272,23 +277,6 @@ function Sequence({
   );
 }
 
-function FormField({
-  label,
-  name,
-  ...props
-}: { label: string; name: FieldPath<FormValues> } & ComponentProps<
-  typeof Input
->) {
-  const { register } = useFormContext<FormValues>();
-
-  return (
-    <div className="flex flex-col gap-2 py-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} {...props} {...register(name)} />
-    </div>
-  );
-}
-
 function Videos() {
   const { fields, append, remove } = useFieldArray({
     name: "videos",
@@ -370,6 +358,8 @@ export default function Create() {
   const encodedBoard = params.get("board");
 
   const methods = useForm<FormValues>({
+    mode: "onTouched",
+    resolver: zodResolver(schema),
     defaultValues: async () => {
       if (encodedBoard) {
         return decode(encodedBoard);
@@ -379,8 +369,13 @@ export default function Create() {
     },
   });
 
+  const {
+    formState: { errors },
+  } = methods;
+
   return (
     <div className="container p-5">
+      <Toaster />
       <Link href="/" className="block pb-2 font-mono text-lg">
         <Logo />
       </Link>

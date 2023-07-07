@@ -26,15 +26,21 @@ type KV_BOARD = {
 };
 
 async function getDefaulBoard(userEdtiToken: string) {
-  const { board, editToken } = await kv.hgetall<{
+  const kvBoard = await kv.hgetall<{
     board: string;
     editToken: string;
   }>("viech");
 
-  return {
-    board,
-    canEdit: String(editToken) === userEdtiToken,
-  };
+  if (kvBoard) {
+    const { board, editToken } = kvBoard;
+
+    return {
+      board,
+      canEdit: String(editToken) === userEdtiToken,
+    };
+  }
+
+  return {};
 }
 
 export default async function Home({ searchParams }: { searchParams: any }) {
@@ -43,8 +49,6 @@ export default async function Home({ searchParams }: { searchParams: any }) {
   );
 
   const encodedBoard = decode(searchParams.board);
-
-  console.log("editToken", canEdit);
 
   const board: Board =
     Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(defaultBoard);

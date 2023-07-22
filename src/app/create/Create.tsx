@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 
-import { saveBoard } from "./actions";
+import { saveBoard } from "../actions";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -33,6 +33,7 @@ import {
   FieldPath,
   FieldPathByValue,
   useWatch,
+  useFormState,
 } from "react-hook-form";
 
 import ReactPlayer from "react-player";
@@ -42,6 +43,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 import FormField from "./FormField";
+import { pathOr, stringToPath } from "remeda";
 
 const Persister = () => {
   const { watch } = useFormContext<FormValues>();
@@ -70,6 +72,7 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
     <div>
       <h3 className="mb-2 text-lg">Sequences</h3>
 
+      <FormError name={`videos.${parentIndex}.nipples`} />
       {fields.map((field, index) => (
         <div
           key={field.id}
@@ -144,6 +147,8 @@ function VideoScrubber({
   const [progress, setProgress] = useState<OnProgressProps>();
   const [duration, setDuration] = useState<number>();
 
+  const { setError } = useFormContext();
+
   const [hasError, setHasError] = useState(true);
 
   const playerRef = useRef<any>();
@@ -186,7 +191,13 @@ function VideoScrubber({
           onProgress={setProgress}
           onDuration={setDuration}
           onReady={() => setHasError(false)}
-          onError={() => setHasError(true)}
+          onError={() => {
+            setHasError(true);
+
+            setError(name, {
+              message: `The videoId doesn't seem to be correct`,
+            });
+          }}
           url={`https://www.youtube.com/watch?v=${field.value}`}
           controls
           progressInterval={500}
@@ -228,6 +239,8 @@ function VideoScrubber({
                 getWidthInPercentage={getWidthInPercentage}
                 nippleFormName={`${nipplesFieldName}.${index}`}
                 onClick={() => {
+                  console.log("nipple", nipple);
+
                   playerRef.current.seekTo(nipple.start);
 
                   setCurrentNipple(nipple);
@@ -279,10 +292,31 @@ function Sequence({
   );
 }
 
+function FormError({ name }: { name: FieldPath<FormValues> }) {
+  const { errors } = useFormState<FormValues>({
+    name,
+    exact: true,
+  });
+
+  const fieldError = pathOr(errors, stringToPath(name), undefined);
+
+  console.log("WATCHING - errors", name, fieldError);
+
+  return (
+    <>
+      {fieldError && (
+        <div className="py-2 text-sm text-red-600">{fieldError.message}</div>
+      )}
+    </>
+  );
+}
+
 function Videos() {
   const { fields, append, remove } = useFieldArray({
     name: "videos",
   });
+
+  console.log("RENDERING");
 
   return (
     <>
@@ -337,6 +371,7 @@ function Videos() {
           })}
         </Accordion>
       )}
+      <FormError name="videos" />
 
       <Button
         type="button"
@@ -379,7 +414,20 @@ export default function Create() {
         <Logo />
       </Link>
       <FormProvider {...methods}>
-        <form action={saveBoard}>
+        <form
+          onSubmit={methods.handleSubmit(async (data, event) => {
+            const isPreview =
+              event?.nativeEvent.submitter.formAction.indexOf("preview") > -1;
+
+            if (isPreview) {
+              console.log("HUHUHUHUH");
+            } else {
+              const result = await saveBoard(data);
+
+              console.log("result", result);
+            }
+          })}
+        >
           <Persister />
           <Card>
             <Header />

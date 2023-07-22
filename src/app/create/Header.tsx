@@ -1,32 +1,20 @@
 "use client";
 
-import confetti from "canvas-confetti";
-
 import { experimental_useFormStatus as useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import CopyButton from "@/components/CopyButton";
 
 import { FormValues } from "@/lib/schema";
 
 import { useController, useFormContext } from "react-hook-form";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import FormField from "./FormField";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 export default function Header() {
-  const router = useRouter();
+  const { handleSubmit } = useFormContext();
 
-  const { reset } = useFormContext();
   const searchParams = useSearchParams();
 
   const { field } = useController<FormValues, "title">({
@@ -35,42 +23,8 @@ export default function Header() {
 
   const { pending } = useFormStatus();
 
-  console.log("pending", pending);
-
   return (
     <>
-      <Dialog>
-        <DialogTrigger
-          onClick={() => {
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 },
-            });
-          }}
-        >
-          Open
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Your Video Fiesta board has been published 🎉
-            </DialogTitle>
-            <DialogDescription>
-              <div className="flex flex-col gap-2 pt-6">
-                <CopyButton
-                  label="Public link:"
-                  content="https://www.google.com"
-                />
-                <CopyButton label="Admin link:" content="https://orf.at" />
-                <div className="pt-2 text-orange-500">
-                  Note: Everyone who has the admin link, can edit the board
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
@@ -84,14 +38,20 @@ export default function Header() {
                 variant="outline"
                 type="reset"
                 onClick={() => {
-                  reset();
-                  router.push(`/create`);
+                  location.href = `/create`;
                 }}
               >
                 ↪️ Reset
               </Button>
-              <Button variant="outline" asChild>
-                <a href={`/preview?${searchParams.toString()}`}>Preview 🪄</a>
+              <Button
+                type="submit"
+                variant="outline"
+                onClick={handleSubmit((data) => {
+                  console.log("datasdfsdfsdf", data);
+                })}
+                formAction={`/preview?${searchParams.toString()}`}
+              >
+                Preview 🪄
               </Button>
 
               <Button variant="outline" type="submit" disabled={pending}>

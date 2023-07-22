@@ -16,7 +16,7 @@ export default function CopyButton({
   return (
     <div className="inline-flex items-center gap-2">
       <span className="font-bold">{label}</span>
-      <span className="inline-block rounded-md bg-slate-500 p-1 px-2 text-white">
+      <span className="inline-block truncate rounded-md bg-slate-500 p-1 px-2 text-white">
         {content}
       </span>
       <Button

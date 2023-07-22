@@ -2,6 +2,7 @@ import Link from "next/link";
 import Player from "./../components/Player";
 
 import { decode, encode } from "@/lib/url";
+import { getBoard } from "@/app/actions";
 
 import {
   Card,
@@ -12,39 +13,12 @@ import {
 } from "@/components/ui/card";
 
 import { Board } from "@/lib/types";
+
 import { Button } from "@/components/ui/button";
 
-import { kv } from "@vercel/kv";
-
-type KV_BOARD = {
-  id: string;
-  board: string;
-  edit_token: string;
-  created_at: Date;
-  updated_at: Date;
-  published_at: Date;
-};
-
-async function getDefaulBoard(userEdtiToken: string) {
-  const kvBoard = await kv.hgetall<{
-    board: string;
-    editToken: string;
-  }>("viech");
-
-  if (kvBoard) {
-    const { board, editToken } = kvBoard;
-
-    return {
-      board,
-      canEdit: String(editToken) === userEdtiToken,
-    };
-  }
-
-  return {};
-}
-
 export default async function Home({ searchParams }: { searchParams: any }) {
-  const { board: defaultBoard, canEdit } = await getDefaulBoard(
+  const { board: defaultBoard, canEdit } = await getBoard(
+    "viech",
     searchParams.editToken
   );
 

@@ -3,6 +3,7 @@ import { read, create, update } from "./crud";
 
 import setupDB from "../../drizzle/migrate_local";
 import { InStatement } from "@libsql/client";
+import { Video } from "@/lib/schema";
 
 vi.mock("server-only", () => {
   return {};
@@ -104,4 +105,30 @@ test("should create admin token and id based on UUID functionality", async () =>
 
   expect(newBoard.adminToken).toBeDefined();
   expect(newBoard.id).toBeDefined();
+});
+
+test("it should update videos, we rewrite all videos", async () => {
+  const newBoard = await create(DUMMY_BOARD);
+
+  const newVideos: Array<Video> = [
+    {
+      videoId: "abcdef",
+      sequences: [
+        {
+          label: "huhuhu",
+          start: 1,
+          end: 10,
+        },
+      ],
+    },
+  ];
+
+  await update(newBoard.id, {
+    ...newBoard,
+    videos: newVideos,
+  });
+
+  const updatedBoard = await read(newBoard.id);
+
+  expect(updatedBoard.videos).toEqual(newVideos);
 });

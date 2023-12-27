@@ -6,7 +6,7 @@ import { buildDbClient } from "@/lib/dbClient";
 import { boardsTable, sequencesTable } from "../../drizzle/schema";
 
 import { eq } from "drizzle-orm";
-import { Board } from "@/lib/schema";
+import { Board, videosSchema } from "@/lib/schema";
 
 const db = buildDbClient();
 
@@ -52,12 +52,14 @@ export const read = async (id: string) => {
 
   return {
     ...joinedBoard.board,
-    videos: Object.values(joinedBoard.videos).map((sequences) => {
-      return {
-        videoId: sequences[0].videoId,
-        sequences: sequences,
-      };
-    }),
+    videos: videosSchema.parse(
+      Object.values(joinedBoard.videos).map((sequences) => {
+        return {
+          videoId: sequences[0].videoId,
+          sequences: sequences,
+        };
+      }),
+    ),
   };
 };
 

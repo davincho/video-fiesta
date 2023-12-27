@@ -3,7 +3,7 @@
 import React, { Fragment } from "react";
 import ReactPlayer from "react-player";
 
-import { Board, Nipple, Video } from "@/lib/types";
+import { Board, Sequence, Video } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 export default function Player({ board }: { board: Board }) {
@@ -14,7 +14,7 @@ export default function Player({ board }: { board: Board }) {
   const [isPlaying, setIsPlaying] = React.useState(false);
 
   const [currentScene, setCurrentScene] = React.useState<{
-    nipple: Nipple;
+    sequence: Sequence;
     video: Video;
   }>();
 
@@ -41,7 +41,7 @@ export default function Player({ board }: { board: Board }) {
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
         {(board?.videos ?? []).map((video) => (
           <Fragment key={video.videoId}>
-            {video.nipples.map((nipple) => (
+            {video.sequences.map((nipple) => (
               <Fragment key={nipple.start}>
                 <button
                   className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-4 font-bold text-white shadow  hover:from-pink-500 hover:to-purple-500"

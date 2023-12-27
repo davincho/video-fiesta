@@ -2,13 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 
-import { saveBoard } from "../actions";
+import { saveBoard } from "../app/actions";
+import {useParams} from 'next/navigation'
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Toaster } from "@/components/ui/toaster";
 
-import Header from "./Header";
+import Header from "../app/create/Header";
 
 import {
   Accordion,
@@ -20,8 +21,8 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { encode, decode } from "@/lib/url";
-import { Nipple } from "@/lib/types";
-import { schema, FormValues } from "@/lib/schema";
+import {  Sequence } from "@/lib/types";
+import { boardSchema, FormValues } from "@/lib/schema";
 import Logo from "@/components/Logo";
 
 import {
@@ -34,30 +35,34 @@ import {
   FieldPathByValue,
   useWatch,
   useFormState,
+  SubmitHandler,
 } from "react-hook-form";
 
 import ReactPlayer from "react-player";
-import { ComponentProps, useRef, useState } from "react";
+import { ComponentProps, FormEvent, useRef, useState } from "react";
 import { OnProgressProps } from "react-player/base";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
-import FormField from "./FormField";
+import FormField from "../app/create/FormField";
 import { pathOr, stringToPath } from "remeda";
+import { useToast } from "./ui/use-toast";
+import { ZodError } from "zod";
 
 const Persister = () => {
   const { watch } = useFormContext<FormValues>();
 
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   watch((data) => {
     if (Object.keys(data).length === 0) {
       return;
     }
 
-    router.push(`${pathname}?board=${encode(data)}`);
+    window.history.pushState({}, '', `${pathname}?board=${encode(data)}`)
+
+    // router.replace(`${pathname}?board=${encode(data)}`);
   });
 
   return null;
@@ -65,27 +70,27 @@ const Persister = () => {
 
 function Nipples({ parentIndex }: { parentIndex: number }) {
   const { fields, append, remove } = useFieldArray({
-    name: `videos.${parentIndex}.nipples`,
+    name: `videos.${parentIndex}.sequences`,
   });
 
   return (
     <div>
       <h3 className="mb-2 text-lg">Sequences</h3>
 
-      <FormError name={`videos.${parentIndex}.nipples`} />
+      <FormError name={`videos.${parentIndex}.sequences`} />
       {fields.map((field, index) => (
         <div
           key={field.id}
           className="-ml-3 grid auto-cols-min grid-flow-col gap-2 rounded-lg p-2 px-3 hover:bg-gray-100"
         >
           <FormField
-            name={`videos.${parentIndex}.nipples.${index}.label`}
+            name={`videos.${parentIndex}.sequences.${index}.label`}
             label="Label"
             className="w-[200px]"
           />
 
           <FormField
-            name={`videos.${parentIndex}.nipples.${index}.start`}
+            name={`videos.${parentIndex}.sequences.${index}.start`}
             label="Start"
             type="number"
             placeholder="sec"
@@ -97,7 +102,7 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
           />
 
           <FormField
-            name={`videos.${parentIndex}.nipples.${index}.end`}
+            name={`videos.${parentIndex}.sequences.${index}.end`}
             label="End"
             placeholder="sec"
             type="number"
@@ -139,10 +144,10 @@ function Nipples({ parentIndex }: { parentIndex: number }) {
 
 function VideoScrubber({
   name,
-  nipplesFieldName,
+  sequencesFieldName,
 }: {
   name: FieldPath<FormValues>;
-  nipplesFieldName: FieldPathByValue<FormValues, Nipple[]>;
+  sequencesFieldName: FieldPathByValue<FormValues, Sequence[]>;
 }) {
   const [progress, setProgress] = useState<OnProgressProps>();
   const [duration, setDuration] = useState<number>();
@@ -157,13 +162,13 @@ function VideoScrubber({
     name,
   });
 
-  const [currentNipple, setCurrentNipple] = useState<Nipple>();
+  const [currentNipple, setCurrentNipple] = useState<Sequence>();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const {
-    field: { value: nipples },
-  } = useController<FormValues, typeof nipplesFieldName>({
-    name: nipplesFieldName,
+    field: { value: sequences },
+  } = useController<FormValues, typeof sequencesFieldName>({
+    name: sequencesFieldName,
   });
 
   const getWidthInPercentage = (seconds?: string | number) => {
@@ -212,7 +217,7 @@ function VideoScrubber({
               style={{
                 left: getWidthInPercentage(progress?.playedSeconds),
                 width: (progress?.playedSeconds ?? 0) > 0 ? 1 : 0,
-                height: 10 + 12 * nipples.length,
+                height: 10 + 12 * sequences.length,
               }}
             />
 
@@ -232,18 +237,18 @@ function VideoScrubber({
               }}
             />
 
-            {nipples.map((nipple, index) => (
+            {sequences.map((sequence, index) => (
               <Sequence
-                key={nipple.label + nipple.start}
-                nipple={nipple}
+                key={sequence.label + sequence.start}
+                nipple={sequence}
                 getWidthInPercentage={getWidthInPercentage}
-                nippleFormName={`${nipplesFieldName}.${index}`}
+                nippleFormName={`${sequencesFieldName}.${index}`}
                 onClick={() => {
-                  console.log("nipple", nipple);
+                  console.log("nipple", sequence);
 
-                  playerRef.current.seekTo(nipple.start);
+                  playerRef.current.seekTo(sequence.start);
 
-                  setCurrentNipple(nipple);
+                  setCurrentNipple(sequence);
                   setIsPlaying(true);
                 }}
               />
@@ -268,7 +273,7 @@ function Sequence({
   getWidthInPercentage,
 }: {
   onClick: () => void;
-  nipple: Nipple;
+  nipple: Sequence;
   nippleFormName: string;
   getWidthInPercentage: (seconds?: string | number) => string;
 }) {
@@ -316,7 +321,7 @@ function Videos() {
     name: "videos",
   });
 
-  console.log("RENDERING");
+
 
   return (
     <>
@@ -345,7 +350,7 @@ function Videos() {
                             />
                             <div>
                               <VideoScrubber
-                                nipplesFieldName={`videos.${index}.nipples`}
+                                sequencesFieldName={`videos.${index}.sequences`}
                                 name={`videos.${index}.videoId`}
                               />
                             </div>
@@ -379,7 +384,7 @@ function Videos() {
         onClick={() => {
           append({
             videoId: "",
-            nipples: [],
+            sequences: [],
           });
         }}
       >
@@ -389,48 +394,133 @@ function Videos() {
   );
 }
 
-export default function Create() {
+const isZodError = (error: any): error is ZodError => error.errors != null;
+
+export default function Create({
+  admin_token,
+  board,
+  b_id,
+}: {
+  b_id?: string;
+  board?: string;
+  admin_token?: string;
+}) {
+  const { toast } = useToast();
+
+  
+
+  const isEditMode = !!b_id;
+
+  const router = useRouter();
   const params = useSearchParams();
 
-  const encodedBoard = params.get("board");
+  
 
   const methods = useForm<FormValues>({
     mode: "onTouched",
-    resolver: zodResolver(schema),
+    resolver: zodResolver(boardSchema),
     defaultValues: async () => {
+
+      const encodedBoard = params.get('board')
+
+      
+
       if (encodedBoard) {
+        console.log('HUHU', decode(encodedBoard))
         return decode(encodedBoard);
+      }
+
+      if (board) {
+        return board;
       }
 
       return {};
     },
   });
 
+  const { setError } = methods;
+
+  const submitHandler: SubmitHandler<FormValues> = async (formData, event) => {
+    if (!event) {
+      return;
+    }
+
+    const submitter = (event.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement;
+    const formAction = submitter.formAction;
+
+    try {
+      const isPreview = formAction.indexOf("preview") > -1;
+
+      if (isPreview) {
+
+
+        router.push(`/preview?${params.toString()}`)
+
+        console.log("HUHUHUHUH");
+      } else {
+        // Check if operation is CREATE or UPDATE action
+
+        if (b_id) {
+          const { success, errors, data } = await saveBoard(formData, {
+            b_id,
+            admin_token,
+          });
+
+          console.log("server errors:", errors);
+
+          if (!success) {
+            if (errors) {
+              const test = Object.keys(
+                errors
+              ) as unknown as keyof typeof errors;
+
+              errors.forEach((error) => {
+                console.log("SETTING ERROR for", error.path.join("."));
+
+                const errorPath = error.path.join(".");
+
+                setError(error.path.map((part) => `${part}`).join("."), {
+                  message: error.message,
+                });
+              });
+            }
+            toast({
+              variant: "destructive",
+              title: "Uh oh! Something went wrong.",
+            });
+          } else {
+            toast({
+              variant: "success",
+              title: "Board saved",
+            });
+
+            methods.reset(data.board);
+          }
+        } else {
+          console.log("CREATING NEW BOARD");
+        }
+
+        // const result = await saveBoard(data);
+
+        // console.log("result", result);
+      }
+    } catch {}
+  };
+
   return (
     <div className="container p-5">
+      
       <Toaster />
 
       <Link href="/" className="block pb-2 font-mono text-lg">
         <Logo />
       </Link>
       <FormProvider {...methods}>
-        <form
-          onSubmit={methods.handleSubmit(async (data, event) => {
-            const isPreview =
-              event?.nativeEvent.submitter.formAction.indexOf("preview") > -1;
-
-            if (isPreview) {
-              console.log("HUHUHUHUH");
-            } else {
-              const result = await saveBoard(data);
-
-              console.log("result", result);
-            }
-          })}
-        >
-          <Persister />
+        <form onSubmit={methods.handleSubmit(submitHandler)}>
+          {!isEditMode && <Persister />}
           <Card>
-            <Header />
+            <Header isEditMode={isEditMode} />
             <CardContent>
               <Videos />
             </CardContent>
@@ -441,3 +531,94 @@ export default function Create() {
     </div>
   );
 }
+
+
+/**
+ * 
+ * 
+ * {
+    "title": "Wiener Nipple Board",
+    "videos": [
+        {
+            "videoId": "P59kknO1wQY",
+            "nipples": [
+                {
+                    "label": "HAZUNG",
+                    "start": "12",
+                    "end": "16"
+                },
+                {
+                    "label": "MÜTE",
+                    "start": "8",
+                    "end": "12"
+                },
+                {
+                    "label": "HERR MINISTER",
+                    "start": "67",
+                    "end": "74"
+                }
+            ]
+        },
+        {
+            "videoId": "Q8hnPWbKFPc",
+            "nipples": [
+                {
+                    "label": "Bringta bringta",
+                    "start": "51",
+                    "end": "55"
+                },
+                {
+                    "label": "Hat Angst die Usterreicher",
+                    "start": "107",
+                    "end": "120"
+                }
+            ]
+        },
+        {
+            "videoId": "eSJgyCpXYYA",
+            "nipples": [
+                {
+                    "label": "Raketenraucher",
+                    "start": "55",
+                    "end": "59"
+                },
+                {
+                    "label": "Streicheln",
+                    "start": "61",
+                    "end": "71"
+                }
+            ]
+        },
+        {
+            "videoId": "sQPnzG8n-Xg",
+            "nipples": [
+                {
+                    "label": "Nächste deppate Frog",
+                    "start": "34",
+                    "end": "50"
+                }
+            ]
+        },
+        {
+            "videoId": "Ft__88zQG9I",
+            "nipples": [
+                {
+                    "label": "Vegetarier",
+                    "start": "45",
+                    "end": "49"
+                }
+            ]
+        },
+        {
+            "videoId": "4d7-p_F5JsM",
+            "nipples": [
+                {
+                    "label": "Katze Fischhandlung",
+                    "start": "338",
+                    "end": "347"
+                }
+            ]
+        }
+    ]
+}
+ */

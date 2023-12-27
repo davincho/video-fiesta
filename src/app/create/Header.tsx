@@ -1,6 +1,8 @@
 "use client";
 
-import { experimental_useFormStatus as useFormStatus } from "react-dom";
+ 
+
+ import { useFormState } from 'react-dom'
 import { Button } from "@/components/ui/button";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,16 +14,19 @@ import { useSearchParams } from "next/navigation";
 
 import FormField from "./FormField";
 
-export default function Header() {
-  const { handleSubmit } = useFormContext();
-
+export default function Header({ isEditMode }: { isEditMode: boolean }) {
   const searchParams = useSearchParams();
 
   const { field } = useController<FormValues, "title">({
     name: "title",
   });
 
-  const { pending } = useFormStatus();
+  const { pending } = useFormState();
+  const {
+    formState: { errors },
+  } = useFormContext();
+
+  const { isDirty } = useFormState();
 
   return (
     <>
@@ -34,32 +39,51 @@ export default function Header() {
           </CardTitle>
           <div className="relative">
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                type="reset"
-                onClick={() => {
-                  location.href = `/create`;
-                }}
-              >
-                ↪️ Reset
-              </Button>
-              <Button
-                type="submit"
-                variant="outline"
-                onClick={handleSubmit((data) => {
-                  console.log("datasdfsdfsdf", data);
-                })}
-                formAction={`/preview?${searchParams.toString()}`}
-              >
-                Preview 🪄
-              </Button>
+              {isEditMode && (
+                <>
+                  <Button
+                    variant="outline"
+                    type="submit"
+                    disabled={pending || !isDirty}
+                  >
+                    Save 💾
+                  </Button>
+                </>
+              )}
 
-              <Button variant="outline" type="submit" disabled={pending}>
-                Publish 🦄
-              </Button>
+              {!isEditMode && (
+                <>
+                  <Button
+                    variant="outline"
+                    type="reset"
+                    onClick={() => {
+                      location.href = `/create`;
+                    }}
+                  >
+                    ↪️ Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    formAction={`/preview?${searchParams.toString()}`}
+                  >
+                    Preview 🪄
+                  </Button>
+
+                  <Button variant="outline" type="submit" disabled={pending}>
+                    Publish 🦄
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
+        {errors.root?.serverError.type === 401 && (
+          <div className="rounded-md bg-orange-300 p-3 text-orange-800">
+            Looks like you don not have permissions editing this board
+          </div>
+        )}
+
         <CardDescription>
           Add multiple Youtube videos and the sequences you want to extract
         </CardDescription>

@@ -1,5 +1,5 @@
-import Create from "./Create";
+import CreateOrEdit from "@/components/CreateOrEdit";
 
 export default async function Home() {
-  return <Create />;
+  return <CreateOrEdit />;
 }

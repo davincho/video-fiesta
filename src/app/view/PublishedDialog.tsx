@@ -14,9 +14,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 export default function PublishedDialog({}: {}) {
+  const params = useParams();
   const searchParams = useSearchParams();
 
   const [isMounted, setIsMounted] = React.useState(false);
@@ -34,9 +35,7 @@ export default function PublishedDialog({}: {}) {
     return;
   }
 
-  const publicLink = `https://video-fiesta.vercel.app/view?b_id=${searchParams.get(
-    "b_id"
-  )}`;
+  const publicLink = `https://video-fiesta.vercel.app/view/${params.b_id}`;
 
   return (
     <Dialog defaultOpen>
@@ -69,7 +68,7 @@ export default function PublishedDialog({}: {}) {
           <CopyButton label="Public link:" content={publicLink} />
           <CopyButton
             label="Admin link:"
-            content={`${publicLink}&admin_token=${searchParams.get(
+            content={`${publicLink}?admin_token=${searchParams.get(
               "admin_token"
             )}`}
           />

@@ -17,15 +17,15 @@ import { Board } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
 export default async function Home({ searchParams }: { searchParams: any }) {
-  const { board: defaultBoard, canEdit } = await getBoard(
-    "viech",
-    searchParams.editToken
-  );
+  const { board: defaultBoard, canEdit } = await getBoard({
+    id: "viech",
+    adminToken: searchParams.editToken,
+  });
 
   const encodedBoard = decode(searchParams.board);
 
   const board: Board =
-    Object.keys(encodedBoard).length > 0 ? encodedBoard : decode(defaultBoard);
+    Object.keys(encodedBoard).length > 0 ? encodedBoard : defaultBoard;
 
   return (
     <main className="min-h-screen p-4 sm:px-24 lg:px-40">
@@ -47,7 +47,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
         </CardContent>
         <CardFooter className="justify-center">
           <Link href="/create" className="p-6 underline underline-offset-2">
-            Create your own nipple audio board 🤩
+            Create your own video board 🤩
           </Link>
         </CardFooter>
       </Card>

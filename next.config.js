@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
+    experimental: {
+        windowHistorySupport: true,
+        serverComponentsExternalPackages: ["libsql"],
+      },
 };
 
 module.exports = nextConfig;

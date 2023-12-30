@@ -35,7 +35,7 @@ const DUMMY_BOARD = {
   ],
 };
 
-const { client, doMigration, db } = setupDB("viech");
+const { client, doMigration } = setupDB();
 
 beforeAll(async () => {
   await doMigration();
@@ -51,6 +51,10 @@ const getRowsCount = async (sql: InStatement) => {
   let res = await client.execute(sql);
   return res.rows.length;
 };
+
+test("it should not fail if searching for an non-existing board", async () => {
+  await read("non-existent");
+});
 
 test("it should create a new board", async () => {
   expect(await getRowsCount("SELECT * from boards")).toEqual(0);
@@ -130,5 +134,6 @@ test("it should update videos, we rewrite all videos", async () => {
 
   const updatedBoard = await read(newBoard.id);
 
+  assert(updatedBoard);
   expect(updatedBoard.videos).toEqual(newVideos);
 });

@@ -53,12 +53,3 @@ export type Board = FormValues;
 export type Video = Board["videos"][0];
 
 export type Sequence = Video["sequences"][0];
-
-export type KV_ENTRY = {
-  id: string;
-  board: string;
-  admin_token: string;
-  created_at: Date;
-  updated_at: Date;
-  published_at: Date;
-};

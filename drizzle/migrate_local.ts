@@ -2,11 +2,9 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 
-const DIR = __dirname;
-
-export default function setupDB(name: string) {
+export default function setupDB() {
   const client = createClient({
-    url: `file://${DIR}/${name}.db`,
+    url: process.env.NEXT_TURSO_DB_URL as string,
   });
 
   const db = drizzle(client);

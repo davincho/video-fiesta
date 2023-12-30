@@ -22,6 +22,10 @@ export const read = async (id: string) => {
     .innerJoin(sequencesTable, eq(boardsTable.id, sequencesTable.boardId))
     .where(eq(boardsTable.id, id));
 
+  if (rows.length === 0) {
+    return null;
+  }
+
   const result = rows.reduce<
     Record<
       string,
@@ -105,7 +109,15 @@ export const create = async (board: Board) => {
 
   await writeBoardVideos(newBoard.id, board);
 
-  return read(newBoard.id);
+  const response = await read(newBoard.id);
+
+  if (!response) {
+    throw new Error(
+      `Error while creating board: new board (id: ${newBoard.id}) could not be found in DB`,
+    );
+  }
+
+  return response;
 };
 
 export const update = async (id: string, board: Board) => {
@@ -124,5 +136,13 @@ export const update = async (id: string, board: Board) => {
   // Writing videos
   await writeBoardVideos(id, board);
 
-  return read(id);
+  const response = await read(id);
+
+  if (!response) {
+    throw new Error(
+      `Error while creating board: updated board (id: ${id}) could not be found in DB`,
+    );
+  }
+
+  return response;
 };

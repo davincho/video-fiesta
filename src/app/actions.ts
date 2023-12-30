@@ -2,102 +2,14 @@
 
 import "server-only";
 
-import { encode } from "@/lib/url";
 import { boardSchema } from "@/lib/schema";
-
-import { nanoid } from "nanoid";
-
-import { buildDbClient } from "@/lib/dbClient";
-import { boardsTable, sequencesTable, videosTable } from "../../drizzle/schema";
 
 import { notFound } from "next/navigation";
 import { z, ZodError } from "zod";
 
 import { FieldError } from "react-hook-form";
-import { eq } from "drizzle-orm";
-import { Board, Sequence } from "@/lib/types";
 
-const db = buildDbClient();
-
-const read = async (id?: string) => {
-  if (!id) {
-    return null;
-  }
-
-  console.info(`Reading board with ID: ${id}`);
-
-  // Fetch containing board
-  const board = (
-    await db.select().from(boardsTable).where(eq(boardsTable.id, id))
-  )[0];
-
-  if (!board) {
-    console.warn(`Could not find board with id ${id}`);
-    return null;
-  }
-
-  // Fetch respective videos
-
-  const videos = [
-    {
-      videoId: "P59kknO1wQY",
-      sequences: [
-        {
-          label: "HAZUNG",
-          start: "12",
-          end: "16",
-        },
-      ],
-    },
-  ];
-
-  return {
-    ...board,
-    videos,
-  };
-};
-
-const write = async (id: string, board: Board) => {
-  console.log(`Writing board with ID: ${id}`);
-
-  const { title, videos } = board;
-
-  // Write board
-  await db
-    .update(boardsTable)
-    .set({
-      title,
-    })
-    .where(eq(boardsTable.id, id));
-
-  // Writing videos
-
-  await db
-    .insert(videosTable)
-    .values(
-      videos.map((video) => ({
-        id: video.videoId,
-      })),
-    )
-    .onConflictDoNothing();
-
-  // Cleanup the whole mess
-  await db.delete(sequencesTable).where(eq(sequencesTable.board_id, id));
-
-  const sequences: Array<typeof sequencesTable.$inferInsert> = [];
-
-  videos.forEach((video) => {
-    video.sequences.forEach((sequence) => {
-      sequences.push({
-        ...sequence,
-        board_id: id,
-        video_id: video.videoId,
-      });
-    });
-  });
-
-  await db.insert(sequencesTable).values(sequences);
-};
+import { create, read, update } from "@/db/crud";
 
 const parseErrorSchema = (
   zodErrors: z.ZodIssue[],
@@ -136,11 +48,9 @@ const parseErrorSchema = (
 
 export const saveBoard = async (
   data: object,
-  { b_id, admin_token }: { b_id: string; admin_token?: string },
+  { id, adminToken }: { id: string; adminToken?: string },
 ) => {
-  const { title, ...rest } = data;
-
-  const parsedData = boardSchema.safeParse(rest);
+  const parsedData = boardSchema.safeParse(data);
 
   if (!parsedData.success) {
     console.log("error", parsedData.error.toString());
@@ -152,18 +62,16 @@ export const saveBoard = async (
   }
 
   // Update
-  if (b_id) {
-    const result = await read(b_id);
+  if (id) {
+    const result = await read(id);
 
-    if (!result || result.adminToken !== admin_token) {
+    if (!result || result.adminToken !== adminToken) {
       return {
         success: false,
       };
     }
 
-    await write(b_id, {
-      board: encode(parsedData.data),
-    });
+    await update(id, parsedData.data);
 
     return {
       success: true,
@@ -173,24 +81,16 @@ export const saveBoard = async (
     };
   }
 
-  const boardId = nanoid();
-  const adminToken = nanoid(64);
+  const newBoard = await create(parsedData.data);
 
-  await write(boardId, {
-    board: encode(parsedData.data),
-    admin_token: adminToken,
-    created_at: new Date().toISOString(),
-    published_at: new Date().toISOString(),
-  });
-
-  return { boardId, adminToken, success: true };
+  return { boardId: newBoard.id, adminToken, success: true };
 };
 
 export const getBoard = async ({
   id,
   adminToken,
 }: {
-  id?: string;
+  id: string;
   adminToken?: string;
 }) => {
   const result = await read(id);
@@ -201,5 +101,5 @@ export const getBoard = async ({
 
   const { adminToken: boardAdminToken, ...board } = result;
 
-  return { board, canEdit: boardAdminToken === adminToken };
+  return { board, canEdit: boardAdminToken && boardAdminToken === adminToken };
 };

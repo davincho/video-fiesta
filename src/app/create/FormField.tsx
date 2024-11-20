@@ -26,6 +26,9 @@ export default function FormField({
     formState: { errors },
   } = useFormContext<FormValues>();
 
+  const string = "x";
+  const t = pathOr({ x: [{ y: 0 }] }, stringToPath(string), {});
+
   const getError = (name: string) =>
     pathOr(errors, stringToPath(name), undefined);
 

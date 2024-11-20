@@ -4,7 +4,7 @@ export function encode(input: object) {
   return lzString.compressToEncodedURIComponent(JSON.stringify(input));
 }
 
-export function decode(input: string) {
+export function decode(input: string | null) {
   if (!input) {
     return {};
   }

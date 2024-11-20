@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 
 import { saveBoard } from "../app/actions";
-import {useParams} from 'next/navigation'
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -21,8 +20,8 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { encode, decode } from "@/lib/url";
-import {  Sequence } from "@/lib/types";
-import { boardSchema, FormValues } from "@/lib/schema";
+
+import { boardSchema, FormValues, Sequence } from "@/lib/schema";
 import Logo from "@/components/Logo";
 
 import {
@@ -39,7 +38,7 @@ import {
 } from "react-hook-form";
 
 import ReactPlayer from "react-player";
-import { ComponentProps, FormEvent, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { OnProgressProps } from "react-player/base";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -48,25 +47,8 @@ import FormField from "../app/create/FormField";
 import { pathOr, stringToPath } from "remeda";
 import { useToast } from "./ui/use-toast";
 import { ZodError } from "zod";
-
-const Persister = () => {
-  const { watch } = useFormContext<FormValues>();
-
-  const router = useRouter();
-  const pathname = usePathname();
-
-  watch((data) => {
-    if (Object.keys(data).length === 0) {
-      return;
-    }
-
-    window.history.pushState({}, '', `${pathname}?board=${encode(data)}`)
-
-    // router.replace(`${pathname}?board=${encode(data)}`);
-  });
-
-  return null;
-};
+import { useHash } from "@/app/useHash";
+import { SequenceComponent } from "./SequenceComponent";
 
 function Nipples({ parentIndex }: { parentIndex: number }) {
   const { fields, append, remove } = useFieldArray({
@@ -238,7 +220,7 @@ function VideoScrubber({
             />
 
             {sequences.map((sequence, index) => (
-              <Sequence
+              <SequenceComponent
                 key={sequence.label + sequence.start}
                 nipple={sequence}
                 getWidthInPercentage={getWidthInPercentage}
@@ -266,37 +248,6 @@ function VideoScrubber({
   );
 }
 
-function Sequence({
-  onClick,
-  nipple,
-  nippleFormName,
-  getWidthInPercentage,
-}: {
-  onClick: () => void;
-  nipple: Sequence;
-  nippleFormName: string;
-  getWidthInPercentage: (seconds?: string | number) => string;
-}) {
-  useWatch({
-    name: nippleFormName,
-  });
-
-  return (
-    <div key={nipple.label + nipple.start}>
-      <label
-        onClick={onClick}
-        title={nipple.label}
-        htmlFor={`${nippleFormName}.label`}
-        className="relative block h-3 cursor-pointer bg-yellow-300 hover:bg-yellow-400"
-        style={{
-          left: getWidthInPercentage(nipple.start),
-          width: getWidthInPercentage(nipple.end - nipple.start),
-        }}
-      />
-    </div>
-  );
-}
-
 function FormError({ name }: { name: FieldPath<FormValues> }) {
   const { errors } = useFormState<FormValues>({
     name,
@@ -320,8 +271,6 @@ function Videos() {
   const { fields, append, remove } = useFieldArray({
     name: "videos",
   });
-
-
 
   return (
     <>
@@ -394,7 +343,91 @@ function Videos() {
   );
 }
 
-const isZodError = (error: any): error is ZodError => error.errors != null;
+const DEFAULT_INITIAL_VALUES = {
+  title: "Wiener Nipple Board",
+  videos: [
+    {
+      videoId: "P59kknO1wQY",
+      sequences: [
+        {
+          label: "HAZUNG",
+          start: 12,
+          end: 16,
+        },
+        {
+          label: "MÜTE",
+          start: 8,
+          end: 12,
+        },
+        {
+          label: "HERR MINISTER",
+          start: 67,
+          end: 74,
+        },
+      ],
+    },
+    {
+      videoId: "Q8hnPWbKFPc",
+      sequences: [
+        {
+          label: "Bringta bringta",
+          start: 51,
+          end: 55,
+        },
+        {
+          label: "Hat Angst die Usterreicher",
+          start: 107,
+          end: 120,
+        },
+      ],
+    },
+    {
+      videoId: "eSJgyCpXYYA",
+      sequences: [
+        {
+          label: "Raketenraucher",
+          start: 55,
+          end: 59,
+        },
+        {
+          label: "Streicheln",
+          start: 61,
+          end: 71,
+        },
+      ],
+    },
+    {
+      videoId: "sQPnzG8n-Xg",
+      sequences: [
+        {
+          label: "Nächste deppate Frog",
+          start: 34,
+          end: 50,
+        },
+      ],
+    },
+    {
+      videoId: "Ft__88zQG9I",
+      sequences: [
+        {
+          label: "Vegetarier",
+          start: 45,
+          end: 49,
+        },
+      ],
+    },
+    {
+      videoId: "4d7-p_F5JsM",
+      sequences: [
+        {
+          label: "Katze Fischhandlung",
+          start: 338,
+          end: 347,
+        },
+      ],
+    },
+  ],
+} satisfies FormValues;
 
 export default function Create({
   admin_token,
@@ -407,40 +440,51 @@ export default function Create({
 }) {
   const { toast } = useToast();
 
-  
-
   const isEditMode = !!b_id;
 
   const router = useRouter();
-  const params = useSearchParams();
 
-  
+  const [hash, setHash] = useHash();
 
   const methods = useForm<FormValues>({
     mode: "onTouched",
     resolver: zodResolver(boardSchema),
     defaultValues: async () => {
-
-      const encodedBoard = params.get('board')
-
-      
-
-      if (encodedBoard) {
-        console.log('HUHU', decode(encodedBoard))
-        return decode(encodedBoard);
-      }
-
-      if (board) {
-        return board;
-      }
-
-      return {};
+      return hash ? decode(hash.substring(1)) : DEFAULT_INITIAL_VALUES;
+    },
+    resetOptions: {
+      keepDirty: true,
     },
   });
+
+  const watch = methods.watch;
+
+  useEffect(() => {
+    const subscription = watch((data, params) => {
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+
+      if (!params.name) {
+        return;
+      }
+
+      console.log("SETTING HASH", data, params);
+
+      setHash(data);
+    }, {});
+
+    return () => {
+      console.log("UNSUBSCRIBING - setHash");
+      subscription.unsubscribe();
+    };
+  }, [watch, setHash]);
 
   const { setError } = methods;
 
   const submitHandler: SubmitHandler<FormValues> = async (formData, event) => {
+    console.log("test");
+
     if (!event) {
       return;
     }
@@ -449,13 +493,13 @@ export default function Create({
       .submitter as HTMLButtonElement;
     const formAction = submitter.formAction;
 
+    console.log("SUBMITTER", submitter, formAction);
+
     try {
       const isPreview = formAction.indexOf("preview") > -1;
 
       if (isPreview) {
-
-
-        router.push(`/preview?${params.toString()}`)
+        router.push(`/preview${window.location.hash}`);
 
         console.log("HUHUHUHUH");
       } else {
@@ -463,8 +507,8 @@ export default function Create({
 
         if (b_id) {
           const { success, errors, data } = await saveBoard(formData, {
-            b_id,
-            admin_token,
+            id: b_id,
+            adminToken: admin_token,
           });
 
           console.log("server errors:", errors);
@@ -472,7 +516,7 @@ export default function Create({
           if (!success) {
             if (errors) {
               const test = Object.keys(
-                errors
+                errors,
               ) as unknown as keyof typeof errors;
 
               errors.forEach((error) => {
@@ -508,9 +552,10 @@ export default function Create({
     } catch {}
   };
 
+  console.log("ERRORS", methods.formState.errors);
+
   return (
     <div className="container p-5">
-      
       <Toaster />
 
       <Link href="/" className="block pb-2 font-mono text-lg">
@@ -518,7 +563,6 @@ export default function Create({
       </Link>
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(submitHandler)}>
-          {!isEditMode && <Persister />}
           <Card>
             <Header isEditMode={isEditMode} />
             <CardContent>
@@ -531,7 +575,6 @@ export default function Create({
     </div>
   );
 }
-
 
 /**
  * 

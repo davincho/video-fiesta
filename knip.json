@@ -1,0 +1,6 @@
+{
+  "paths": {
+    "@lib": ["./lib/index.ts"],
+    "@lib/*": ["./lib/*"]
+  }
+}

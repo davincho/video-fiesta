@@ -3,8 +3,8 @@
 import React, { Fragment } from "react";
 import ReactPlayer from "react-player";
 
-import { Board, Sequence, Video } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { Board, Sequence, Video } from "@/lib/schema";
 
 export default function Player({ board }: { board: Board }) {
   const [isMounted, setIsMounted] = React.useState(false);
@@ -41,16 +41,16 @@ export default function Player({ board }: { board: Board }) {
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
         {(board?.videos ?? []).map((video) => (
           <Fragment key={video.videoId}>
-            {video.sequences.map((nipple) => (
-              <Fragment key={nipple.start}>
+            {video.sequences.map((sequence) => (
+              <Fragment key={sequence.start}>
                 <button
                   className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-4 font-bold text-white shadow  hover:from-pink-500 hover:to-purple-500"
                   onClick={() => {
                     if (playerRef.current) {
-                      playerRef.current.seekTo(nipple.start, "seconds");
+                      playerRef.current.seekTo(sequence.start, "seconds");
 
                       setCurrentScene({
-                        nipple,
+                        sequence,
                         video,
                       });
 
@@ -58,7 +58,7 @@ export default function Player({ board }: { board: Board }) {
                     }
                   }}
                 >
-                  {nipple.label}
+                  {sequence.label}
                 </button>
               </Fragment>
             ))}
@@ -87,7 +87,7 @@ export default function Player({ board }: { board: Board }) {
               setIsBuffering(false);
             }}
             onEnded={() => setIsPlaying(false)}
-            url={`https://www.youtube.com/watch?v=${currentScene?.video.videoId}&start=${currentScene?.nipple.start}&end=${currentScene?.nipple.end}`}
+            url={`https://www.youtube.com/watch?v=${currentScene?.video.videoId}&start=${currentScene?.video.start}&end=${currentScene?.video.end}`}
           />
         </div>
       </div>

@@ -1,15 +1,12 @@
 "use client";
 
- 
-
- import { useFormState } from 'react-dom'
 import { Button } from "@/components/ui/button";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { FormValues } from "@/lib/schema";
 
-import { useController, useFormContext } from "react-hook-form";
+import { useController, useFormContext, useFormState } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 
 import FormField from "./FormField";
@@ -21,9 +18,8 @@ export default function Header({ isEditMode }: { isEditMode: boolean }) {
     name: "title",
   });
 
-  const { pending } = useFormState();
   const {
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useFormContext();
 
   const { isDirty } = useFormState();
@@ -44,7 +40,7 @@ export default function Header({ isEditMode }: { isEditMode: boolean }) {
                   <Button
                     variant="outline"
                     type="submit"
-                    disabled={pending || !isDirty}
+                    disabled={isSubmitting || !isDirty}
                   >
                     Save 💾
                   </Button>
@@ -70,7 +66,11 @@ export default function Header({ isEditMode }: { isEditMode: boolean }) {
                     Preview 🪄
                   </Button>
 
-                  <Button variant="outline" type="submit" disabled={pending}>
+                  <Button
+                    variant="outline"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
                     Publish 🦄
                   </Button>
                 </>

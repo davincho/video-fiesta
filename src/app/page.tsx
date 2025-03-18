@@ -41,11 +41,20 @@ export default async function Home({ searchParams }: { searchParams: any }) {
           >
             Start Creating
           </Link>
+          <Link
+            href="#featured-board"
+            className="mt-4 transform border-4 border-white bg-transparent px-8 py-4 text-xl font-bold uppercase text-white transition-transform hover:rotate-2 hover:bg-white hover:text-black"
+          >
+            See Sample Board
+          </Link>
         </div>
       </section>
 
       {/* Featured Board Section */}
-      <section className="bg-blue-600 px-4 py-20 sm:px-24 lg:px-40">
+      <section
+        id="featured-board"
+        className="bg-blue-600 px-4 py-20 sm:px-24 lg:px-40"
+      >
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-12 -rotate-1 transform text-6xl font-black uppercase text-white">
             Featured Board

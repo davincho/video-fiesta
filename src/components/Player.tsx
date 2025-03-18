@@ -58,8 +58,6 @@ export default function Player({ board }: { board: Board }) {
     return null;
   }
 
-  console.log("sequence", currentScene);
-
   return (
     <>
       {isBuffering && (

@@ -543,11 +543,11 @@ export default function Create({
           }
         } else {
           console.log("CREATING NEW BOARD");
+
+          const result = await saveBoard(formData, {});
+
+          console.log("result", result);
         }
-
-        // const result = await saveBoard(data);
-
-        // console.log("result", result);
       }
     } catch {}
   };

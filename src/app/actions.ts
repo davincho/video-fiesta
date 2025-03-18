@@ -48,7 +48,7 @@ const parseErrorSchema = (
 
 export const saveBoard = async (
   data: object,
-  { id, adminToken }: { id: string; adminToken?: string },
+  { id, adminToken }: { id?: string; adminToken?: string },
 ) => {
   const parsedData = boardSchema.safeParse(data);
 

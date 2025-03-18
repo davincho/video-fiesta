@@ -51,17 +51,17 @@ export default function PublishedDialog({}: {}) {
               <input
                 type="text"
                 value="Public Link"
-                className="w-full rounded-md bg-gray-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md bg-gray-100 px-4 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="mr-2 flex-1">
               <input
                 type="text"
                 value="Admin Link"
-                className="w-full rounded-md bg-gray-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md bg-gray-100 px-4 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <button className="flex-shrink-0 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button className="shrink-0 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-500">
               Copy
             </button>
           </div>

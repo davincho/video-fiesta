@@ -15,7 +15,7 @@ export default async function View({
 
   console.log("params", params);
 
-  const { board, canEdit } = await getBoard({ b_id, admin_token });
+  const { board, canEdit } = await getBoard({ id: b_id, adminToken: admin_token });
 
   return (
     <div className="p-2">

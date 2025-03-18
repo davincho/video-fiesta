@@ -15,6 +15,10 @@ const parseErrorSchema = (
   zodErrors: z.ZodIssue[],
   validateAllFieldCriteria: boolean,
 ) => {
+
+
+  
+
   const errors: Record<string, FieldError> = {};
   for (; zodErrors.length; ) {
     const error = zodErrors[0];

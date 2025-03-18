@@ -26,11 +26,10 @@ export default function FormField({
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const string = "x";
-  const t = pathOr({ x: [{ y: 0 }] }, stringToPath(string), {});
 
-  const getError = (name: string) =>
-    pathOr(errors, stringToPath(name), undefined);
+  const getError = (name: string) => pathOr(errors, stringToPath(name) as any, {
+    message: ''
+  });
 
   const fieldError = getError(name)?.message;
 
@@ -47,3 +46,5 @@ export default function FormField({
     </div>
   );
 }
+
+

@@ -12,7 +12,7 @@ export default async function Edit({
   const { admin_token } = searchParams;
   const { b_id } = params;
 
-  const { board, canEdit } = await getBoard({ b_id, admin_token });
+  const { board, canEdit } = await getBoard({ id: b_id, adminToken: admin_token });
 
   // if (!canEdit) {
   //   redirect("/");
@@ -20,7 +20,7 @@ export default async function Edit({
 
   return (
     <div className="p-2">
-      <CreateOrEdit board={board} b_id={b_id} admin_token={admin_token} />
+      <CreateOrEdit  b_id={b_id} admin_token={admin_token} />
     </div>
   );
 }

@@ -41,7 +41,7 @@ import ReactPlayer from "react-player";
 import { useEffect, useRef, useState } from "react";
 import { OnProgressProps } from "react-player/base";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+
 
 import FormField from "../app/create/FormField";
 import { pathOr, stringToPath } from "remeda";
@@ -49,6 +49,8 @@ import { useToast } from "./ui/use-toast";
 import { ZodError } from "zod";
 import { useHash } from "@/app/useHash";
 import { SequenceComponent } from "./SequenceComponent";
+import { useRouter } from "next/navigation";
+
 
 function Nipples({ parentIndex }: { parentIndex: number }) {
   const { fields, append, remove } = useFieldArray({
@@ -249,14 +251,36 @@ function VideoScrubber({
 }
 
 function FormError({ name }: { name: FieldPath<FormValues> }) {
+
+
+  const g = name;
+
   const { errors } = useFormState<FormValues>({
-    name,
+    name: g,
     exact: true,
   });
 
-  const fieldError = pathOr(errors, stringToPath(name), undefined);
 
-  console.log("WATCHING - errors", name, fieldError);
+
+
+
+
+
+
+
+
+
+
+
+  
+  const hui = stringToPath(name)
+
+  const fieldError = pathOr(errors, hui as any, undefined as any);
+
+
+  
+
+
 
   return (
     <>
@@ -431,11 +455,10 @@ const DEFAULT_INITIAL_VALUES = {
 
 export default function Create({
   admin_token,
-  board,
   b_id,
 }: {
   b_id?: string;
-  board?: string;
+  
   admin_token?: string;
 }) {
   const { toast } = useToast();
@@ -515,16 +538,19 @@ export default function Create({
 
           if (!success) {
             if (errors) {
-              const test = Object.keys(
-                errors,
-              ) as unknown as keyof typeof errors;
 
-              errors.forEach((error) => {
-                console.log("SETTING ERROR for", error.path.join("."));
 
-                const errorPath = error.path.join(".");
+              
 
-                setError(error.path.map((part) => `${part}`).join("."), {
+              
+
+              Object.entries(errors).forEach(([path, error]) => {
+                
+
+                
+
+
+                setError(path as any, {
                   message: error.message,
                 });
               });
@@ -539,7 +565,11 @@ export default function Create({
               title: "Board saved",
             });
 
-            methods.reset(data.board);
+            if(data) {
+              methods.reset(data.board);
+            }
+
+            
           }
         } else {
           console.log("CREATING NEW BOARD");

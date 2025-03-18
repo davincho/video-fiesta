@@ -6,7 +6,7 @@ import { getBoard } from "@/app/actions";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Board } from "@/lib/types";
+import { Board } from "@/lib/schema";
 
 import { Button } from "@/components/ui/button";
 
